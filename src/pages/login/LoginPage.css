@@ -1,0 +1,70 @@
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 32px;
+  gap: 10px;
+}
+
+.login-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-heading);
+  letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-top: -4px;
+}
+
+.login-description {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-forgot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+}
+
+.login-forgot a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.login-forgot a:hover {
+  color: var(--brand-primary);
+}
+
+.login-footer {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.login-footer p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.login-footer-organizer {
+  font-size: 13px !important;
+  color: var(--text-placeholder) !important;
+}

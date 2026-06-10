@@ -1,0 +1,57 @@
+.register-org-header {
+  margin-bottom: 28px;
+}
+
+.register-org-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-heading);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.register-org-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.register-org-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: 4px;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.register-org-footer {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.register-org-footer p {
+  font-size: 14px;
+}
+
+@media (max-width: 400px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
