@@ -1,0 +1,191 @@
+.bottom-cards {
+  display: grid;
+  grid-template-columns: 1fr 1.7fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.bcard {
+  border-radius: var(--radius-card);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Elite Status (oscura) ===== */
+.bcard--elite {
+  background: linear-gradient(160deg, #1E1B4B 0%, #312E81 100%);
+  color: #fff;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.bcard-elite-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bcard-elite-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.bcard-elite-sub {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.bcard-elite-medal {
+  color: #FBBF24;
+  flex-shrink: 0;
+}
+
+.bcard-elite-rank {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bcard-elite-rank-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.bcard-elite-rank-value {
+  font-size: 30px;
+  font-weight: 800;
+}
+
+/* ===== Upcoming Milestones (clara) ===== */
+.bcard--milestones {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+  gap: 14px;
+}
+
+.bcard-milestones-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bcard-milestones-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.bcard-milestones-info {
+  color: var(--text-placeholder);
+}
+
+.bcard-progress {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bcard-progress::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 44px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border-default);
+}
+
+.bcard-progress-bar {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand-primary) 0%, var(--brand-accent) 100%);
+}
+
+.bcard-progress-pct {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.bcard-milestones-text {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.bcard-milestones-btn {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 9px 20px;
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-card);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-body);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.bcard-milestones-btn:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+/* ===== Campaign Boost (morada) ===== */
+.bcard--boost {
+  background: linear-gradient(160deg, var(--brand-primary) 0%, var(--brand-accent) 100%);
+  color: #fff;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
+}
+
+.bcard-boost-icon {
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 4px;
+}
+
+.bcard-boost-title {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.bcard-boost-text {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+}
+
+.bcard-boost-btn {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 10px 22px;
+  border: none;
+  background: #fff;
+  color: var(--brand-primary);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform 0.15s, opacity 0.2s;
+}
+
+.bcard-boost-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+@media (max-width: 1000px) {
+  .bottom-cards {
+    grid-template-columns: 1fr;
+  }
+}

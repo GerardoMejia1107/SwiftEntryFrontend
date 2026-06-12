@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
 import StatsRow from './sections/StatsRow';
 import FlaggedEventsTable from './sections/FlaggedEventsTable';
 import RecentActivity from './sections/RecentActivity';
+import BottomCards from './sections/BottomCards';
 import './AdminHomePage.css';
 
 export default function AdminHomePage() {
@@ -37,6 +38,8 @@ export default function AdminHomePage() {
           <FlaggedEventsTable />
           <RecentActivity />
         </div>
+
+        <BottomCards />
       </div>
     </DashboardLayout>
   );
