@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
+import StatsRow from './sections/StatsRow';
 import './AdminHomePage.css';
 
 export default function AdminHomePage() {
@@ -28,7 +29,9 @@ export default function AdminHomePage() {
           </p>
         </header>
 
-        {/* Las secciones (métricas, eventos marcados, actividad) se agregan
+        <StatsRow />
+
+        {/* Las secciones (eventos marcados, actividad) se agregan
             en los siguientes commits. */}
       </div>
     </DashboardLayout>
