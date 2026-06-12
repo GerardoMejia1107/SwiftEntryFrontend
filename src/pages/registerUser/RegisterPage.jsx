@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AuthLayout from '../../components/authLayout/AuthLayout';
 import {
   InputField,
@@ -73,7 +74,8 @@ const CalendarIcon = () => (
   </svg>
 );
 
-export default function RegisterPage({ onNavigate }) {
+export default function RegisterPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     nombre: '',
     apellido: '',
@@ -119,7 +121,7 @@ export default function RegisterPage({ onNavigate }) {
     try {
       await registerUser(payload);
       alert('Registro exitoso');
-      onNavigate('/login');
+      navigate('/login');
     } catch (error) {
       console.error('Status:', error.response?.status);
       console.error('Response body:', JSON.stringify(error.response?.data, null, 2));
@@ -132,7 +134,7 @@ export default function RegisterPage({ onNavigate }) {
 
   const topNav = (
     <div className="register-topnav">
-      <button className="back-btn" onClick={() => onNavigate('/login')}>
+      <button className="back-btn" onClick={() => navigate('/login')}>
         <BackIcon />
       </button>
       <span className="brand-name">SwiftEntry</span>
@@ -281,7 +283,7 @@ export default function RegisterPage({ onNavigate }) {
       <div className="register-footer">
         <p>
           ¿Ya tienes una cuenta?{' '}
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/login'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
             Iniciar Sesión
           </a>
         </p>

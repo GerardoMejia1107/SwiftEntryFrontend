@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AuthLayout from '../../components/authLayout/AuthLayout';
 import { BrandLogo, InputField, PrimaryButton } from '../../components/formComponents/FormComponents';
 import { loginUser } from '../../api/authService';
+import { useAuth } from '../../context/AuthContext';
+import { roleRoutes, DEFAULT_ROUTE } from '../../router/roleRoutes';
 import './LoginPage.css';
 
 const EyeIcon = ({ open }) => (
@@ -34,16 +37,9 @@ const LockIcon = () => (
   </svg>
 );
 
-const roleRoutes = {
-  USER: '/home-user',
-  ORGANIZER: '/home-organizer',
-  ADMIN: '/home-admin',
-  1: '/home-user',
-  2: '/home-organizer',
-  3: '/home-admin',
-};
-
-export default function LoginPage({ onNavigate }) {
+export default function LoginPage() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,10 +52,10 @@ export default function LoginPage({ onNavigate }) {
     setError('');
     setLoading(true);
     try {
-      const { data } = await loginUser({ email: form.email, password: form.password });
-      localStorage.setItem('token', data.token);
-      const destination = roleRoutes[data.role] ?? roleRoutes[data.roleId] ?? '/home-user';
-      onNavigate(destination);
+      const tokenData = await loginUser({ email: form.email, password: form.password });
+      login(tokenData);
+      const destination = roleRoutes[tokenData.role] ?? DEFAULT_ROUTE;
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message ?? 'Credenciales incorrectas. Intenta de nuevo.');
     } finally {
@@ -117,13 +113,13 @@ export default function LoginPage({ onNavigate }) {
       <div className="login-footer">
         <p>
           ¿No tienes una cuenta?{' '}
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/register'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
             Crear cuenta
           </a>
         </p>
         <p className="login-footer-organizer">
           ¿Eres organizador?{' '}
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/register-organizer'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/register-organizer'); }}>
             Registra tu organización
           </a>
         </p>

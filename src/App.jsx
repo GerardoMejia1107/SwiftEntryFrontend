@@ -1,35 +1,44 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import LoginPage from './pages/login/LoginPage';
-import RegisterOrganizerPage from './pages/registerOrganizer/RegisterOrganizerPage';
 import RegisterPage from './pages/registerUser/RegisterPage';
-
-const WelcomeUser = () => <h1>Bienvenido usuario normal</h1>;
-const WelcomeOrganizer = () => <h1>Bienvenido organizador</h1>;
-const WelcomeAdmin = () => <h1>Bienvenido usuario administrador</h1>;
-
-function AppRoutes() {
-  const navigate = useNavigate();
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage onNavigate={navigate} />} />
-      <Route path="/register" element={<RegisterPage onNavigate={navigate} />} />
-      <Route path="/register-organizer" element={<RegisterOrganizerPage onNavigate={navigate} />} />
-
-      <Route path="/home-user" element={<WelcomeUser />} />
-      <Route path="/home-organizer" element={<WelcomeOrganizer />} />
-      <Route path="/home-admin" element={<WelcomeAdmin />} />
-
-      <Route path="/" element={<Navigate to="/login" />} />
-    </Routes>
-  );
-}
+import RegisterOrganizerPage from './pages/registerOrganizer/RegisterOrganizerPage';
+import AdminHomePage from './pages/homeAdmin/AdminHomePage';
+import OrganizerHomePage from './pages/homeOrganizer/OrganizerHomePage';
+import ConsumerHomePage from './pages/homeConsumer/ConsumerHomePage';
+import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
+import ProtectedRoute from './router/ProtectedRoute';
 
 export default function App() {
   return (
     <BrowserRouter>
       <div className="app">
-        <AppRoutes />
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register-organizer" element={<RegisterOrganizerPage />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+          {/* Protected routes */}
+          <Route path="/home-admin" element={
+            <ProtectedRoute allowedRoles={['ROLE_ADMINISTRATOR']}>
+              <AdminHomePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-organizer" element={
+            <ProtectedRoute allowedRoles={['ROLE_ORGANIZER']}>
+              <OrganizerHomePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-consumer" element={
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+              <ConsumerHomePage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
       </div>
     </BrowserRouter>
   );

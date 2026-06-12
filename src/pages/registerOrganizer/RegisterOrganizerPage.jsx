@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AuthLayout from '../../components/authLayout/AuthLayout';
 import {
   InputField,
@@ -71,7 +72,8 @@ const MapPinIcon = () => (
   </svg>
 );
 
-export default function RegisterOrganizerPage({ onNavigate }) {
+export default function RegisterOrganizerPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     orgName: '',
     repNombre: '',
@@ -97,7 +99,7 @@ export default function RegisterOrganizerPage({ onNavigate }) {
 
   const topNav = (
     <div className="register-topnav">
-      <button className="back-btn" onClick={() => onNavigate('/login')}>
+      <button className="back-btn" onClick={() => navigate('/login')}>
         <BackIcon />
       </button>
       <span className="brand-name">SwiftEntry</span>
@@ -219,7 +221,7 @@ export default function RegisterOrganizerPage({ onNavigate }) {
 
       <div className="register-org-footer">
         <p>
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/login'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
             Ya tengo una cuenta? Iniciar Sesión
           </a>
         </p>
