@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
 import StatsRow from './sections/StatsRow';
 import FlaggedEventsTable from './sections/FlaggedEventsTable';
+import RecentActivity from './sections/RecentActivity';
 import './AdminHomePage.css';
 
 export default function AdminHomePage() {
@@ -34,7 +35,7 @@ export default function AdminHomePage() {
 
         <div className="admin-main-row">
           <FlaggedEventsTable />
-          {/* "Recent Activity" se agrega aquí en el siguiente commit. */}
+          <RecentActivity />
         </div>
       </div>
     </DashboardLayout>

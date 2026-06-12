@@ -1,0 +1,109 @@
+.activity-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding-bottom: 20px;
+}
+
+/* Línea vertical que conecta los iconos del timeline */
+.activity-item::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 34px;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--border-default);
+}
+
+.activity-item:last-child {
+  padding-bottom: 0;
+}
+
+.activity-item:last-child::before {
+  display: none;
+}
+
+.activity-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.activity-icon--purple {
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+}
+
+.activity-icon--red {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.activity-icon--green {
+  background: #DCFCE7;
+  color: #16A34A;
+}
+
+.activity-icon--blue {
+  background: #DBEAFE;
+  color: #2563EB;
+}
+
+.activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.activity-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.activity-time {
+  font-size: 11px;
+  color: var(--text-placeholder);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.activity-text {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.activity-clear {
+  margin-top: 8px;
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--brand-primary);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 0;
+}
+
+.activity-clear:hover {
+  text-decoration: underline;
+}
