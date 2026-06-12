@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
 import StatsRow from './sections/StatsRow';
+import FlaggedEventsTable from './sections/FlaggedEventsTable';
 import './AdminHomePage.css';
 
 export default function AdminHomePage() {
@@ -31,8 +32,10 @@ export default function AdminHomePage() {
 
         <StatsRow />
 
-        {/* Las secciones (eventos marcados, actividad) se agregan
-            en los siguientes commits. */}
+        <div className="admin-main-row">
+          <FlaggedEventsTable />
+          {/* "Recent Activity" se agrega aquí en el siguiente commit. */}
+        </div>
       </div>
     </DashboardLayout>
   );
