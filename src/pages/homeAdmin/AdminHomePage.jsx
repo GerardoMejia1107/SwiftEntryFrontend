@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
+import './AdminHomePage.css';
 
 export default function AdminHomePage() {
   const { logout } = useAuth();
@@ -10,11 +12,25 @@ export default function AdminHomePage() {
     navigate('/login', { replace: true });
   };
 
+  const user = { name: 'Alex Rivera', roleLabel: 'Lead Administrator' };
+
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Welcome, Administrator</h1>
-      <p>You are logged in as <strong>ROLE_ADMINISTRATOR</strong>.</p>
-      <button onClick={handleLogout}>Logout</button>
-    </div>
+    <DashboardLayout
+      user={user}
+      activeItem="dashboard"
+      onLogout={handleLogout}
+    >
+      <div className="admin-page">
+        <header className="admin-page-header">
+          <h1 className="admin-page-title">Dashboard</h1>
+          <p className="admin-page-subtitle">
+            Resumen general del portal de organizadores.
+          </p>
+        </header>
+
+        {/* Las secciones (métricas, eventos marcados, actividad) se agregan
+            en los siguientes commits. */}
+      </div>
+    </DashboardLayout>
   );
 }
