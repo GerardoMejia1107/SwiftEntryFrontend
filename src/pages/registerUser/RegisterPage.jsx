@@ -5,6 +5,7 @@ import {
   PrimaryButton,
   CheckboxField,
 } from '../../components/formComponents/FormComponents.jsx';
+import { registerUser } from '../../api/authService';
 import './RegisterPage.css';
 
 const BackIcon = () => (
@@ -81,6 +82,10 @@ export default function RegisterPage({ onNavigate }) {
     dui: '',
     telefono: '',
     fechaNacimiento: '',
+    streetAddress: '',
+    municipality: '',
+    department: '',
+    country: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [accepted, setAccepted] = useState(false);
@@ -88,16 +93,46 @@ export default function RegisterPage({ onNavigate }) {
 
   const update = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!accepted) return;
+
     setLoading(true);
-    setTimeout(() => setLoading(false), 1500);
+
+    const payload = {
+      name: form.nombre,
+      lastName: form.apellido,
+      email: form.email,
+      password: form.password,
+      dui: form.dui,
+      phoneNumber: form.telefono,
+      birthDate: form.fechaNacimiento,
+      roleId: 1,
+      address: {
+        streetAddress: form.streetAddress,
+        municipality: form.municipality,
+        department: form.department,
+        country: form.country,
+      },
+    };
+
+    try {
+      await registerUser(payload);
+      alert('Registro exitoso');
+      onNavigate('/login');
+    } catch (error) {
+      console.error('Status:', error.response?.status);
+      console.error('Response body:', JSON.stringify(error.response?.data, null, 2));
+      console.error('Full error:', error);
+      alert(error.response?.data?.message ?? `Error ${error.response?.status ?? ''}: ${JSON.stringify(error.response?.data) ?? 'Error al crear usuario'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const topNav = (
     <div className="register-topnav">
-      <button className="back-btn" onClick={() => onNavigate('login')}>
+      <button className="back-btn" onClick={() => onNavigate('/login')}>
         <BackIcon />
       </button>
       <span className="brand-name">SwiftEntry</span>
@@ -188,6 +223,43 @@ export default function RegisterPage({ onNavigate }) {
           required
         />
 
+        <InputField
+          id="streetAddress"
+          label="Dirección"
+          placeholder="Calle, número, colonia"
+          value={form.streetAddress}
+          onChange={update('streetAddress')}
+          required
+        />
+
+        <div className="form-row">
+          <InputField
+            id="municipality"
+            label="Municipio"
+            placeholder="Ej. San Salvador"
+            value={form.municipality}
+            onChange={update('municipality')}
+            required
+          />
+          <InputField
+            id="department"
+            label="Departamento"
+            placeholder="Ej. San Salvador"
+            value={form.department}
+            onChange={update('department')}
+            required
+          />
+        </div>
+
+        <InputField
+          id="country"
+          label="País"
+          placeholder="Ej. El Salvador"
+          value={form.country}
+          onChange={update('country')}
+          required
+        />
+
         <CheckboxField
           id="terms"
           checked={accepted}
@@ -209,7 +281,7 @@ export default function RegisterPage({ onNavigate }) {
       <div className="register-footer">
         <p>
           ¿Ya tienes una cuenta?{' '}
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('login'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/login'); }}>
             Iniciar Sesión
           </a>
         </p>

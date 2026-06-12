@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AuthLayout from '../../components/authLayout/AuthLayout';
 import { BrandLogo, InputField, PrimaryButton } from '../../components/formComponents/FormComponents';
+import { loginUser } from '../../api/authService';
 import './LoginPage.css';
 
 const EyeIcon = ({ open }) => (
@@ -33,17 +34,37 @@ const LockIcon = () => (
   </svg>
 );
 
+const roleRoutes = {
+  USER: '/home-user',
+  ORGANIZER: '/home-organizer',
+  ADMIN: '/home-admin',
+  1: '/home-user',
+  2: '/home-organizer',
+  3: '/home-admin',
+};
+
 export default function LoginPage({ onNavigate }) {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const update = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    setTimeout(() => setLoading(false), 1500);
+    try {
+      const { data } = await loginUser({ email: form.email, password: form.password });
+      localStorage.setItem('token', data.token);
+      const destination = roleRoutes[data.role] ?? roleRoutes[data.roleId] ?? '/home-user';
+      onNavigate(destination);
+    } catch (err) {
+      setError(err.response?.data?.message ?? 'Credenciales incorrectas. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -86,6 +107,8 @@ export default function LoginPage({ onNavigate }) {
           <a href="#forgot">¿Olvidaste tu contraseña?</a>
         </div>
 
+        {error && <p className="login-error">{error}</p>}
+
         <PrimaryButton type="submit" loading={loading}>
           Iniciar Sesión →
         </PrimaryButton>
@@ -94,13 +117,13 @@ export default function LoginPage({ onNavigate }) {
       <div className="login-footer">
         <p>
           ¿No tienes una cuenta?{' '}
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('register'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/register'); }}>
             Crear cuenta
           </a>
         </p>
         <p className="login-footer-organizer">
           ¿Eres organizador?{' '}
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('register-organizer'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/register-organizer'); }}>
             Registra tu organización
           </a>
         </p>

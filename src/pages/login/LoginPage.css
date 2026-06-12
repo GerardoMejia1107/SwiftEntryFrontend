@@ -68,3 +68,10 @@
   font-size: 13px !important;
   color: var(--text-placeholder) !important;
 }
+
+.login-error {
+  font-size: 13px;
+  color: #ef4444;
+  text-align: center;
+  margin-top: -4px;
+}

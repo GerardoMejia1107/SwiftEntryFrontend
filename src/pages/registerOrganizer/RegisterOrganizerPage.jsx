@@ -97,7 +97,7 @@ export default function RegisterOrganizerPage({ onNavigate }) {
 
   const topNav = (
     <div className="register-topnav">
-      <button className="back-btn" onClick={() => onNavigate('login')}>
+      <button className="back-btn" onClick={() => onNavigate('/login')}>
         <BackIcon />
       </button>
       <span className="brand-name">SwiftEntry</span>
@@ -219,7 +219,7 @@ export default function RegisterOrganizerPage({ onNavigate }) {
 
       <div className="register-org-footer">
         <p>
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('login'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('/login'); }}>
             Ya tengo una cuenta? Iniciar Sesión
           </a>
         </p>
