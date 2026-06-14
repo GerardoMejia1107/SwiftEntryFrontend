@@ -1,32 +1,28 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
 import StatsRow from './sections/StatsRow';
 import FlaggedEventsTable from './sections/FlaggedEventsTable';
 import RecentActivity from './sections/RecentActivity';
-import BottomCards from './sections/BottomCards';
-import NewEventModal from './sections/NewEventModal';
 import './AdminHomePage.css';
 
 export default function AdminHomePage() {
-  const { logout } = useAuth();
+  const { auth, logout } = useAuth();
   const navigate = useNavigate();
-  const [modalOpen, setModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
   };
 
-  const user = { name: 'Alex Rivera', roleLabel: 'Lead Administrator' };
+  const user = auth?.user;
 
   return (
     <DashboardLayout
       user={user}
       activeItem="dashboard"
       onLogout={handleLogout}
-      onNewEvent={() => setModalOpen(true)}
+      onNewEvent={() => navigate('/home-admin/events/new')}
     >
       <div className="admin-page">
         <header className="admin-page-header">
@@ -42,11 +38,7 @@ export default function AdminHomePage() {
           <FlaggedEventsTable />
           <RecentActivity />
         </div>
-
-        <BottomCards />
       </div>
-
-      <NewEventModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </DashboardLayout>
   );
 }

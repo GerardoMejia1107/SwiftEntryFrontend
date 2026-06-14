@@ -30,8 +30,9 @@ function initialsOf(name = '') {
 }
 
 export default function TopBar({ user, onToggleSidebar }) {
-  const name = user?.name ?? 'Administrator';
-  const role = user?.roleLabel ?? 'Lead Administrator';
+  const name = user?.name;
+  const role = user?.role;
+
 
   return (
     <header className="topbar">

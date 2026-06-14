@@ -1,87 +1,126 @@
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(30, 27, 75, 0.5);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 40px 16px;
-  overflow-y: auto;
-}
-
-.modal {
-  width: 100%;
-  max-width: 640px;
-  background: var(--bg-card);
-  border-radius: var(--radius-card);
-  box-shadow: 0 24px 60px rgba(30, 27, 75, 0.25);
+/* ─── Page shell ─── */
+.ef-page {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  max-width: 1100px;
 }
 
-.modal-header {
+.ef-page-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 24px 28px 16px;
-  border-bottom: 1px solid var(--border-default);
+  flex-direction: column;
+  gap: 4px;
 }
 
-.modal-title {
-  font-size: 19px;
+.ef-page-title {
+  font-size: 24px;
   font-weight: 800;
   color: var(--text-heading);
 }
 
-.modal-subtitle {
-  font-size: 13px;
+.ef-page-subtitle {
+  font-size: 14px;
   color: var(--text-muted);
-  margin-top: 2px;
 }
 
-.modal-close {
+/* ─── Form ─── */
+.ef-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Top 2-column grid ─── */
+.ef-top-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ─── Cards ─── */
+.ef-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ─── Card header ─── */
+.ef-card-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  padding: 6px;
-  border-radius: 8px;
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-default);
 }
 
-.modal-close:hover {
-  background: var(--bg-page);
+.ef-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.ef-card-header-text {
+  flex: 1;
+}
+
+.ef-card-title {
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text-heading);
 }
 
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 20px 28px 28px;
+.ef-card-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
 }
 
-.modal-grid-2 {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 14px;
+.ef-card-header-action {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.modal-field {
+/* ─── Field helpers ─── */
+.ef-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-/* Select y textarea: mismo lenguaje visual que InputField */
-.modal-select,
-.modal-textarea {
+.ef-grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.ef-grid-3 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+/* prevent grid/flex children from overflowing their track */
+.ef-grid-2 > *,
+.ef-grid-3 > * {
+  min-width: 0;
+}
+
+/* ─── Select & Textarea ─── */
+.ef-select,
+.ef-textarea {
   width: 100%;
   border: 1.5px solid var(--border-default);
   border-radius: var(--radius-input);
@@ -94,54 +133,46 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.modal-select:focus,
-.modal-textarea:focus {
+.ef-select:focus,
+.ef-textarea:focus {
   border-color: var(--border-focus);
   box-shadow: var(--shadow-input-focus);
 }
 
-.modal-textarea {
+.ef-textarea {
   resize: vertical;
-  min-height: 76px;
+  min-height: 110px;
 }
 
-/* Toggle de dirección */
-.modal-toggle {
-  display: flex;
+/* ─── Address toggle ─── */
+.ef-toggle {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 13.5px;
   font-weight: 600;
   color: var(--text-body);
   cursor: pointer;
-  margin-top: 4px;
 }
 
-.modal-toggle input {
-  width: 17px;
-  height: 17px;
+.ef-toggle input {
+  width: 16px;
+  height: 16px;
   accent-color: var(--brand-primary);
 }
 
-.modal-address {
+.ef-address {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
+  gap: 16px;
+  padding: 18px;
   border: 1px dashed var(--border-default);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--bg-page);
 }
 
-/* Localidades */
-.modal-localities-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-.modal-add-locality {
+/* ─── Add locality button ─── */
+.ef-add-locality {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -150,39 +181,54 @@
   color: var(--brand-primary);
   font-size: 12.5px;
   font-weight: 700;
-  padding: 7px 12px;
+  padding: 7px 14px;
   border-radius: 10px;
   transition: background 0.15s;
 }
 
-.modal-add-locality:hover {
+.ef-add-locality:hover {
   background: #E0E7FF;
 }
 
-.modal-localities {
+/* ─── Localities grid ─── */
+.ef-localities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.ef-locality {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.modal-locality {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--border-default);
   border-radius: 14px;
-  background: var(--bg-card);
+  background: var(--bg-page);
+  min-width: 0;
 }
 
-.modal-locality-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
+/* name gets 2× the space of price — price only needs a short number */
+.ef-locality .ef-grid-2 {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
 }
 
-.modal-remove-locality {
-  align-self: flex-start;
+.ef-locality-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ef-locality-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.ef-remove-locality {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -192,66 +238,102 @@
   font-size: 12.5px;
   font-weight: 700;
   padding: 2px 0;
+  transition: opacity 0.15s;
 }
 
-.modal-remove-locality:hover {
+.ef-remove-locality:hover {
   text-decoration: underline;
 }
 
-/* Mensajes */
-.modal-error {
+/* ─── Feedback messages ─── */
+.ef-error {
   font-size: 13px;
   font-weight: 600;
   color: #DC2626;
   background: #FEE2E2;
-  padding: 10px 14px;
-  border-radius: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
 }
 
-.modal-success {
+.ef-success {
   font-size: 13px;
   font-weight: 600;
   color: #16A34A;
   background: #DCFCE7;
-  padding: 10px 14px;
-  border-radius: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
 }
 
-/* Acciones */
-.modal-actions {
+/* ─── Form actions ─── */
+.ef-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 6px;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-bottom: 8px;
 }
 
-.modal-actions .btn-primary {
-  flex: 1;
+/* keep the submit button auto-width — the global .btn-primary uses width:100% */
+.ef-actions .btn-primary {
+  width: auto;
+  padding: 10px 22px;
+  font-size: 14px;
 }
 
-.modal-cancel {
-  padding: 15px 24px;
+.ef-cancel {
+  padding: 10px 18px;
   border: 1.5px solid var(--border-default);
   background: var(--bg-card);
   border-radius: var(--radius-btn);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-body);
   transition: border-color 0.15s, color 0.15s;
 }
 
-.modal-cancel:hover:not(:disabled) {
+.ef-cancel:hover:not(:disabled) {
   border-color: var(--text-muted);
 }
 
-.modal-cancel:disabled {
+.ef-cancel:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
-  .modal-grid-2,
-  .modal-locality-grid {
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .ef-top-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ef-grid-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .ef-grid-2,
+  .ef-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .ef-localities-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ef-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .ef-actions .btn-primary {
+    width: 100%;
+    padding: 13px 22px;
+    font-size: 15px;
+  }
+
+  .ef-cancel {
+    width: 100%;
+    text-align: center;
   }
 }

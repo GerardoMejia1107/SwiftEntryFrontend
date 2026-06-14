@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { InputField, PrimaryButton, SectionLabel } from '../../../components/formComponents/FormComponents';
-import { createEvent, createLocality } from '../../../api/eventService';
+import { InputField, PrimaryButton } from '../../../components/formComponents/FormComponents';
+import { createEvent } from '../../../api/eventService';
 import './NewEventModal.css';
 
 const CATEGORIES = ['CONCERT', 'SPORTS', 'THEATER', 'COMEDY', 'CONFERENCE', 'FESTIVAL', 'MOVIE', 'CULTURAL'];
@@ -27,32 +27,44 @@ const emptyAddress = () => ({
   referencePoint: '',
 });
 
-const emptyLocality = () => ({ name: '', description: '', price: '', capacity: '' });
+const emptyLocality = () => ({ name: '', description: '', price: '' });
 
-// datetime-local entrega "YYYY-MM-DDTHH:MM"; el backend espera segundos.
 const withSeconds = (value) => (value && value.length === 16 ? `${value}:00` : value);
 
-const CloseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
-
 const TrashIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="3 6 5 6 21 6" />
     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
   </svg>
 );
 
 const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 5v14M5 12h14" />
   </svg>
 );
 
-export default function NewEventModal({ open, onClose, onCreated }) {
+const MapPinIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+    <circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+
+function CardHeader({ number, title, subtitle, action }) {
+  return (
+    <div className="ef-card-header">
+      <span className="ef-badge">{number}</span>
+      <div className="ef-card-header-text">
+        <p className="ef-card-title">{title}</p>
+        {subtitle && <p className="ef-card-subtitle">{subtitle}</p>}
+      </div>
+      {action && <div className="ef-card-header-action">{action}</div>}
+    </div>
+  );
+}
+
+export default function NewEventForm({ onCancel, onCreated }) {
   const [form, setForm] = useState(emptyEvent);
   const [hasAddress, setHasAddress] = useState(false);
   const [address, setAddress] = useState(emptyAddress);
@@ -60,8 +72,6 @@ export default function NewEventModal({ open, onClose, onCreated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  if (!open) return null;
 
   const updateForm = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
   const updateAddress = (field) => (e) => setAddress(prev => ({ ...prev, [field]: e.target.value }));
@@ -81,11 +91,9 @@ export default function NewEventModal({ open, onClose, onCreated }) {
     setLocalities([emptyLocality()]);
   };
 
-  const handleClose = () => {
+  const handleCancel = () => {
     if (loading) return;
-    setError('');
-    setSuccess('');
-    onClose?.();
+    onCancel?.();
   };
 
   const handleSubmit = async (e) => {
@@ -95,41 +103,32 @@ export default function NewEventModal({ open, onClose, onCreated }) {
     setLoading(true);
 
     try {
-      const eventPayload = {
+      const validLocalities = localities
+        .filter((loc) => loc.name.trim() && loc.price !== '')
+        .map((loc) => ({
+          name: loc.name.trim(),
+          description: loc.description.trim() || undefined,
+          price: Number(loc.price),
+        }));
+
+      const payload = {
         name: form.name,
         description: form.description || undefined,
         category: form.category,
         organizerId: Number(form.organizerId),
+        status: form.status,
         startDate: withSeconds(form.startDate),
         endDate: withSeconds(form.endDate),
         venueName: form.venueName || undefined,
-        status: form.status,
         imageUrl: form.imageUrl || undefined,
         address: hasAddress ? { ...address } : undefined,
+        localities: validLocalities.length > 0 ? validLocalities : undefined,
       };
 
-      const createdEvent = await createEvent(eventPayload);
-      const eventId = createdEvent.id;
-
-      // Solo se mandan las localidades con los campos obligatorios llenos.
-      const validLocalities = localities.filter(
-        (loc) => loc.name.trim() && loc.price !== '' && loc.capacity !== '',
-      );
-
-      for (const loc of validLocalities) {
-        const capacity = Number(loc.capacity);
-        await createLocality({
-          eventId,
-          name: loc.name,
-          description: loc.description || undefined,
-          price: Number(loc.price),
-          capacity,
-          availableSlots: capacity, // siempre igual a capacity
-        });
-      }
+      const createdEvent = await createEvent(payload);
 
       setSuccess(
-        `Evento "${createdEvent.name}" creado (ID ${eventId}) con ${validLocalities.length} localidad(es).`,
+        `Evento "${createdEvent.name}" creado con éxito (ID ${createdEvent.id}).`,
       );
       onCreated?.(createdEvent);
       resetAll();
@@ -141,178 +140,217 @@ export default function NewEventModal({ open, onClose, onCreated }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <header className="modal-header">
-          <div>
-            <h2 className="modal-title">Crear nuevo evento</h2>
-            <p className="modal-subtitle">Define el evento y sus localidades.</p>
-          </div>
-          <button type="button" className="modal-close" onClick={handleClose} aria-label="Cerrar">
-            <CloseIcon />
-          </button>
-        </header>
+    <div className="ef-page">
+      <div className="ef-page-header">
+        <h1 className="ef-page-title">Crear nuevo evento</h1>
+        <p className="ef-page-subtitle">Completa los campos para publicar tu evento.</p>
+      </div>
 
-        <form className="modal-form" onSubmit={handleSubmit}>
-          {/* ===== Datos del evento ===== */}
-          <SectionLabel>Datos del evento</SectionLabel>
+      <form className="ef-form" onSubmit={handleSubmit}>
 
-          <InputField
-            id="ev-name"
-            label="Nombre del evento"
-            placeholder="Rock Fest 2026"
-            value={form.name}
-            onChange={updateForm('name')}
-            required
-          />
+        {/* ── Top 2-column grid ── */}
+        <div className="ef-top-grid">
 
-          <div className="modal-field">
-            <label className="input-label" htmlFor="ev-description">Descripción</label>
-            <textarea
-              id="ev-description"
-              className="modal-textarea"
-              placeholder="Breve descripción del evento"
-              value={form.description}
-              onChange={updateForm('description')}
-              rows={3}
+          {/* Card 1: Basic Info */}
+          <div className="ef-card">
+            <CardHeader number="1" title="Información básica" subtitle="Nombre, categoría y estado" />
+            <InputField
+              id="ev-name"
+              label="Nombre del evento"
+              placeholder="Ej. Rock Fest 2026"
+              value={form.name}
+              onChange={updateForm('name')}
+              required
             />
-          </div>
-
-          <div className="modal-grid-2">
-            <div className="modal-field">
-              <label className="input-label" htmlFor="ev-category">Categoría<span className="input-required"> *</span></label>
-              <select id="ev-category" className="modal-select" value={form.category} onChange={updateForm('category')} required>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
+            <div className="ef-field">
+              <label className="input-label" htmlFor="ev-description">Descripción</label>
+              <textarea
+                id="ev-description"
+                className="ef-textarea"
+                placeholder="Breve descripción del evento…"
+                value={form.description}
+                onChange={updateForm('description')}
+                rows={4}
+              />
             </div>
-
-            <div className="modal-field">
-              <label className="input-label" htmlFor="ev-status">Estado<span className="input-required"> *</span></label>
-              <select id="ev-status" className="modal-select" value={form.status} onChange={updateForm('status')} required>
-                {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+            <div className="ef-grid-2">
+              <div className="ef-field">
+                <label className="input-label" htmlFor="ev-category">
+                  Categoría<span className="input-required"> *</span>
+                </label>
+                <select id="ev-category" className="ef-select" value={form.category} onChange={updateForm('category')} required>
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="ef-field">
+                <label className="input-label" htmlFor="ev-status">
+                  Estado<span className="input-required"> *</span>
+                </label>
+                <select id="ev-status" className="ef-select" value={form.status} onChange={updateForm('status')} required>
+                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
-          <div className="modal-grid-2">
+          {/* Card 2: Venue & Dates */}
+          <div className="ef-card">
+            <CardHeader number="2" title="Recinto y fechas" subtitle="Lugar, horarios e imagen" />
+            <div className="ef-grid-2">
+              <InputField
+                id="ev-organizer"
+                label="ID del organizador"
+                type="number"
+                min="1"
+                placeholder="Ej. 1"
+                value={form.organizerId}
+                onChange={updateForm('organizerId')}
+                required
+              />
+              <InputField
+                id="ev-venue"
+                label="Nombre del recinto"
+                placeholder="Estadio Nacional"
+                value={form.venueName}
+                onChange={updateForm('venueName')}
+              />
+            </div>
+            <div className="ef-grid-2">
+              <InputField
+                id="ev-start"
+                label="Fecha de inicio"
+                type="datetime-local"
+                value={form.startDate}
+                onChange={updateForm('startDate')}
+                required
+              />
+              <InputField
+                id="ev-end"
+                label="Fecha de fin"
+                type="datetime-local"
+                value={form.endDate}
+                onChange={updateForm('endDate')}
+                required
+              />
+            </div>
             <InputField
-              id="ev-organizer"
-              label="ID del organizador"
-              type="number"
-              min="1"
-              placeholder="Ej. 1"
-              value={form.organizerId}
-              onChange={updateForm('organizerId')}
-              required
-            />
-            <InputField
-              id="ev-venue"
-              label="Nombre del recinto"
-              placeholder="National Stadium"
-              value={form.venueName}
-              onChange={updateForm('venueName')}
+              id="ev-image"
+              label="URL de imagen"
+              type="url"
+              placeholder="https://example.com/imagen.jpg"
+              value={form.imageUrl}
+              onChange={updateForm('imageUrl')}
             />
           </div>
+        </div>
 
-          <div className="modal-grid-2">
-            <InputField
-              id="ev-start"
-              label="Inicio"
-              type="datetime-local"
-              value={form.startDate}
-              onChange={updateForm('startDate')}
-              required
-            />
-            <InputField
-              id="ev-end"
-              label="Fin"
-              type="datetime-local"
-              value={form.endDate}
-              onChange={updateForm('endDate')}
-              required
-            />
-          </div>
-
-          <InputField
-            id="ev-image"
-            label="URL de imagen"
-            type="url"
-            placeholder="https://..."
-            value={form.imageUrl}
-            onChange={updateForm('imageUrl')}
-          />
-
-          {/* ===== Dirección (opcional) ===== */}
-          <label className="modal-toggle">
+        {/* ── Card 3: Address ── */}
+        <div className="ef-card">
+          <CardHeader number="3" title="Dirección física" subtitle="Opcional — para eventos presenciales" />
+          <label className="ef-toggle">
             <input
               type="checkbox"
               checked={hasAddress}
               onChange={(e) => setHasAddress(e.target.checked)}
             />
-            Este evento tiene una dirección física
+            <MapPinIcon />
+            Incluir dirección física
           </label>
-
           {hasAddress && (
-            <div className="modal-address">
+            <div className="ef-address">
               <InputField
                 id="ad-street"
                 label="Dirección"
-                placeholder="Blvd. de los Héroes 123"
+                placeholder="Calle Principal #123"
                 value={address.streetAddress}
                 onChange={updateAddress('streetAddress')}
                 required
               />
-              <div className="modal-grid-2">
-                <InputField id="ad-neighborhood" label="Colonia / Barrio" value={address.neighborhood} onChange={updateAddress('neighborhood')} />
-                <InputField id="ad-municipality" label="Municipio" value={address.municipality} onChange={updateAddress('municipality')} required />
+              <div className="ef-grid-3">
+                <InputField id="ad-neighborhood" label="Colonia / Barrio" placeholder="Colonia Escalón"
+                  value={address.neighborhood} onChange={updateAddress('neighborhood')} />
+                <InputField id="ad-municipality" label="Municipio" placeholder="San Salvador"
+                  value={address.municipality} onChange={updateAddress('municipality')} required />
+                <InputField id="ad-department" label="Departamento" placeholder="San Salvador"
+                  value={address.department} onChange={updateAddress('department')} required />
               </div>
-              <div className="modal-grid-2">
-                <InputField id="ad-department" label="Departamento" value={address.department} onChange={updateAddress('department')} required />
-                <InputField id="ad-country" label="País" value={address.country} onChange={updateAddress('country')} required />
+              <div className="ef-grid-2">
+                <InputField id="ad-country" label="País" placeholder="El Salvador"
+                  value={address.country} onChange={updateAddress('country')} required />
+                <InputField id="ad-reference" label="Punto de referencia" placeholder="Frente al parque central"
+                  value={address.referencePoint} onChange={updateAddress('referencePoint')} />
               </div>
-              <InputField id="ad-reference" label="Punto de referencia" value={address.referencePoint} onChange={updateAddress('referencePoint')} />
             </div>
           )}
+        </div>
 
-          {/* ===== Localidades ===== */}
-          <div className="modal-localities-head">
-            <SectionLabel>Localidades</SectionLabel>
-            <button type="button" className="modal-add-locality" onClick={addLocality}>
-              <PlusIcon /> Agregar zona
-            </button>
-          </div>
-
-          <div className="modal-localities">
+        {/* ── Card 4: Localities ── */}
+        <div className="ef-card">
+          <CardHeader
+            number="4"
+            title="Localidades"
+            subtitle="Zonas de acceso con precio"
+            action={
+              <button type="button" className="ef-add-locality" onClick={addLocality}>
+                <PlusIcon /> Agregar zona
+              </button>
+            }
+          />
+          <div className="ef-localities-grid">
             {localities.map((loc, index) => (
-              <div className="modal-locality" key={index}>
-                <div className="modal-locality-grid">
-                  <InputField id={`loc-name-${index}`} placeholder="Zona (VIP, General...)" value={loc.name} onChange={updateLocality(index, 'name')} />
-                  <InputField id={`loc-price-${index}`} type="number" min="0" step="0.01" placeholder="Precio" value={loc.price} onChange={updateLocality(index, 'price')} />
-                  <InputField id={`loc-capacity-${index}`} type="number" min="1" placeholder="Capacidad" value={loc.capacity} onChange={updateLocality(index, 'capacity')} />
+              <div className="ef-locality" key={index}>
+                <div className="ef-locality-header">
+                  <span className="ef-locality-badge">Zona {index + 1}</span>
+                  {localities.length > 1 && (
+                    <button type="button" className="ef-remove-locality" onClick={() => removeLocality(index)} aria-label="Quitar zona">
+                      <TrashIcon /> Quitar
+                    </button>
+                  )}
                 </div>
-                <InputField id={`loc-desc-${index}`} placeholder="Descripción (opcional)" value={loc.description} onChange={updateLocality(index, 'description')} />
-                {localities.length > 1 && (
-                  <button type="button" className="modal-remove-locality" onClick={() => removeLocality(index)} aria-label="Quitar zona">
-                    <TrashIcon /> Quitar
-                  </button>
-                )}
+                <div className="ef-grid-2">
+                  <InputField
+                    id={`loc-name-${index}`}
+                    label="Nombre"
+                    placeholder="VIP, General…"
+                    value={loc.name}
+                    onChange={updateLocality(index, 'name')}
+                  />
+                  <InputField
+                    id={`loc-price-${index}`}
+                    label="Precio (USD)"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={loc.price}
+                    onChange={updateLocality(index, 'price')}
+                  />
+                </div>
+                <InputField
+                  id={`loc-desc-${index}`}
+                  label="Descripción (opcional)"
+                  placeholder="Zona frontal con mejor vista…"
+                  value={loc.description}
+                  onChange={updateLocality(index, 'description')}
+                />
               </div>
             ))}
           </div>
+        </div>
 
-          {error && <p className="modal-error">{error}</p>}
-          {success && <p className="modal-success">{success}</p>}
+        {error && <p className="ef-error">{error}</p>}
+        {success && <p className="ef-success">{success}</p>}
 
-          <div className="modal-actions">
-            <button type="button" className="modal-cancel" onClick={handleClose} disabled={loading}>
-              Cancelar
-            </button>
-            <PrimaryButton type="submit" loading={loading}>
-              Crear evento
-            </PrimaryButton>
-          </div>
-        </form>
-      </div>
+        <div className="ef-actions">
+          <button type="button" className="ef-cancel" onClick={handleCancel} disabled={loading}>
+            Cancelar
+          </button>
+          <PrimaryButton type="submit" loading={loading}>
+            Crear evento
+          </PrimaryButton>
+        </div>
+
+      </form>
     </div>
   );
 }
