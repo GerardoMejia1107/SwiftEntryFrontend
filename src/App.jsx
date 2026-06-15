@@ -8,6 +8,7 @@ import NewEventPage from './pages/homeAdmin/NewEventPage';
 import EventsPage from './pages/homeAdmin/EventsPage';
 import OrganizerHomePage from './pages/homeOrganizer/OrganizerHomePage';
 import ConsumerHomePage from './pages/homeConsumer/ConsumerHomePage';
+import SeatSelectionPage from './pages/seatSelection/SeatSelectionPage';
 import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
 import ProtectedRoute from './router/ProtectedRoute';
 
@@ -21,7 +22,6 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/register-organizer" element={<RegisterOrganizerPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
           {/* Protected routes */}
           <Route path="/home-admin" element={
             <ProtectedRoute allowedRoles={['ROLE_ADMINISTRATOR']}>
@@ -46,6 +46,11 @@ export default function App() {
           <Route path="/home-consumer" element={
             <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
               <ConsumerHomePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-consumer/events/:eventId/seats" element={
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+              <SeatSelectionPage />
             </ProtectedRoute>
           } />
 
