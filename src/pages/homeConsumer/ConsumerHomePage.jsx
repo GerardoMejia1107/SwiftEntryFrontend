@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ConsumerLayout from '../../components/dashboardLayout/ConsumerLayout';
 
 export default function ConsumerHomePage() {
-  const { logout } = useAuth();
+  const { auth, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -11,10 +12,17 @@ export default function ConsumerHomePage() {
   };
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Welcome, Consumer</h1>
-      <p>You are logged in as <strong>ROLE_CONSUMER</strong>.</p>
-      <button onClick={handleLogout}>Logout</button>
-    </div>
+    <ConsumerLayout user={auth?.user} activeItem="home" onLogout={handleLogout}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1280, margin: '0 auto' }}>
+        <header style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>
+            Welcome{auth?.user?.name ? `, ${auth.user.name}` : ''}
+          </h1>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
+            Discover events, manage your reservations and payments.
+          </p>
+        </header>
+      </div>
+    </ConsumerLayout>
   );
 }

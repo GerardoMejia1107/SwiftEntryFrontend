@@ -11,6 +11,7 @@ import OrganizerHomePage from './pages/homeOrganizer/OrganizerHomePage';
 import OrganizerEventsPage from './pages/homeOrganizer/OrganizerEventsPage';
 import OrganizerLocalitiesPage from './pages/homeOrganizer/OrganizerLocalitiesPage';
 import ConsumerHomePage from './pages/homeConsumer/ConsumerHomePage';
+import ConsumerEventsPage from './pages/homeConsumer/ConsumerEventsPage';
 import SeatSelectionPage from './pages/seatSelection/SeatSelectionPage';
 import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
 import ProtectedRoute from './router/ProtectedRoute';
@@ -64,6 +65,11 @@ export default function App() {
           <Route path="/home-consumer" element={
             <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
               <ConsumerHomePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-consumer/events" element={
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+              <ConsumerEventsPage />
             </ProtectedRoute>
           } />
           <Route path="/home-consumer/events/:eventId/seats" element={

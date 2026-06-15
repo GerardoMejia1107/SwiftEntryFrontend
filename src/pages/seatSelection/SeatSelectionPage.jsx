@@ -42,6 +42,12 @@ function buildInitialGrid() {
 }
 
 // ── Icons ──────────────────────────────────────────────────
+const BackIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5M12 5l-7 7 7 7"/>
+  </svg>
+);
+
 const PinIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
@@ -121,6 +127,20 @@ export default function SeatSelectionPage() {
 
       {/* ── Sidebar ── */}
       <aside className="ss-sidebar">
+
+        {/* Header / back nav */}
+        <div className="ss-sidebar-header">
+          <button
+            type="button"
+            className="ss-back-btn"
+            onClick={() => navigate('/home-consumer/events')}
+            aria-label="Back to events"
+          >
+            <BackIcon />
+          </button>
+          <span className="ss-header-title">Seat Selection</span>
+        </div>
+
         <div className="ss-sidebar-body">
 
           {/* Event info */}

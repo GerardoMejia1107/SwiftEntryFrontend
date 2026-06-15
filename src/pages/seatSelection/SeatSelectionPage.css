@@ -9,13 +9,49 @@
 
 /* ── Sidebar ─────────────────────────────────────────────── */
 .ss-sidebar {
-  width: 220px;
-  min-width: 220px;
+  width: 240px;
+  min-width: 240px;
   background: var(--bg-card);
   border-right: 1px solid var(--border-default);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* ── Sidebar header (back button) ────────────────────────── */
+.ss-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.ss-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--border-default);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ss-back-btn:hover {
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.ss-header-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
 }
 
 .ss-sidebar-body {
@@ -243,7 +279,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #F2F2F8;
+  background: var(--bg-page);
   position: relative;
 }
 
@@ -258,11 +294,11 @@
 }
 
 .ss-stage-bar {
-  width: 340px;
-  height: 6px;
+  width: min(55%, 360px);
+  height: 7px;
   border-radius: 99px;
-  background: linear-gradient(90deg, #C7D2FE 0%, #818CF8 40%, #C7D2FE 100%);
-  opacity: 0.7;
+  background: linear-gradient(90deg, transparent 0%, var(--brand-primary-light) 15%, var(--brand-primary) 50%, var(--brand-primary-light) 85%, transparent 100%);
+  opacity: 0.85;
 }
 
 .ss-stage-label {
@@ -285,7 +321,7 @@
   border: 1px solid var(--border-default);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-card);
   z-index: 10;
 }
 
@@ -399,8 +435,8 @@
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 700px) {
   .ss-sidebar {
-    width: 180px;
-    min-width: 180px;
+    width: 200px;
+    min-width: 200px;
   }
 
   .ss-seat,
