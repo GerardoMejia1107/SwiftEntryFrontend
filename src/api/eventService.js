@@ -2,6 +2,12 @@ import axios from 'axios';
 
 const api = axios.create({ baseURL: '/swift_entry' });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 // GET /swift_entry/events -> lista de eventos (GeneralResponse.data)
 export const getAllEvents = async () => {
   const response = await api.get('/events');

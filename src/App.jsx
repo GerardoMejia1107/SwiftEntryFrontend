@@ -5,6 +5,7 @@ import RegisterPage from './pages/registerUser/RegisterPage';
 import RegisterOrganizerPage from './pages/registerOrganizer/RegisterOrganizerPage';
 import AdminHomePage from './pages/homeAdmin/AdminHomePage';
 import NewEventPage from './pages/homeAdmin/NewEventPage';
+import EventsPage from './pages/homeAdmin/EventsPage';
 import OrganizerHomePage from './pages/homeOrganizer/OrganizerHomePage';
 import ConsumerHomePage from './pages/homeConsumer/ConsumerHomePage';
 import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
@@ -25,6 +26,11 @@ export default function App() {
           <Route path="/home-admin" element={
             <ProtectedRoute allowedRoles={['ROLE_ADMINISTRATOR']}>
               <AdminHomePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-admin/events" element={
+            <ProtectedRoute allowedRoles={['ROLE_ADMINISTRATOR']}>
+              <EventsPage />
             </ProtectedRoute>
           } />
           <Route path="/home-admin/events/new" element={
