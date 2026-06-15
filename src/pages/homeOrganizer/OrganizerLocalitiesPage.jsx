@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import OrganizerLayout from '../../components/dashboardLayout/OrganizerLayout';
 
-export default function OrganizerHomePage() {
+export default function OrganizerLocalitiesPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -12,14 +12,14 @@ export default function OrganizerHomePage() {
   };
 
   return (
-    <OrganizerLayout user={auth?.user} activeItem="dashboard" onLogout={handleLogout}>
+    <OrganizerLayout user={auth?.user} activeItem="localities" onLogout={handleLogout}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1280, margin: '0 auto' }}>
         <header style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>
-            Dashboard
+            Localities
           </h1>
           <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
-            Welcome back{auth?.user?.name ? `, ${auth.user.name}` : ''}. Here's an overview of your events.
+            Manage zones and seat capacity for your events.
           </p>
         </header>
       </div>

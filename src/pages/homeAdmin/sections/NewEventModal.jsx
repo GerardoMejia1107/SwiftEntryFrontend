@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { InputField, PrimaryButton } from '../../../components/formComponents/FormComponents';
-import { createEvent } from '../../../api/eventService';
+import { createEvent, updateEvent } from '../../../api/eventService';
 import './NewEventModal.css';
 
 const CATEGORIES = ['CONCERT', 'SPORTS', 'THEATER', 'COMEDY', 'CONFERENCE', 'FESTIVAL', 'MOVIE', 'CULTURAL'];
@@ -30,6 +30,35 @@ const emptyAddress = () => ({
 const emptyLocality = () => ({ name: '', description: '', price: '' });
 
 const withSeconds = (value) => (value && value.length === 16 ? `${value}:00` : value);
+
+// Map API event shape → form state
+const toDatetimeLocal = (iso) => iso ? iso.slice(0, 16) : '';
+
+const fromEvent = (ev) => ({
+  name: ev.name || '',
+  description: ev.description || '',
+  category: ev.category || 'CONCERT',
+  organizerId: String(ev.organizer?.id ?? ev.organizerId ?? ''),
+  startDate: toDatetimeLocal(ev.startDate),
+  endDate: toDatetimeLocal(ev.endDate),
+  venueName: ev.venueName || '',
+  status: ev.status || 'DRAFT',
+  imageUrl: ev.imageUrl || '',
+});
+
+const fromAddress = (addr) => addr ? {
+  streetAddress: addr.streetAddress || '',
+  neighborhood: addr.neighborhood || '',
+  municipality: addr.municipality || '',
+  department: addr.department || '',
+  country: addr.country || '',
+  referencePoint: addr.referencePoint || '',
+} : emptyAddress();
+
+const fromLocalities = (locs) =>
+  locs?.length > 0
+    ? locs.map((l) => ({ name: l.name || '', description: l.description || '', price: String(l.price ?? '') }))
+    : [emptyLocality()];
 
 const TrashIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -64,11 +93,13 @@ function CardHeader({ number, title, subtitle, action }) {
   );
 }
 
-export default function NewEventForm({ onCancel, onCreated }) {
-  const [form, setForm] = useState(emptyEvent);
-  const [hasAddress, setHasAddress] = useState(false);
-  const [address, setAddress] = useState(emptyAddress);
-  const [localities, setLocalities] = useState([emptyLocality()]);
+export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEvent }) {
+  const isEdit = Boolean(initialEvent);
+
+  const [form, setForm] = useState(() => initialEvent ? fromEvent(initialEvent) : emptyEvent());
+  const [hasAddress, setHasAddress] = useState(() => Boolean(initialEvent?.address));
+  const [address, setAddress] = useState(() => fromAddress(initialEvent?.address));
+  const [localities, setLocalities] = useState(() => fromLocalities(initialEvent?.localities));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -125,15 +156,18 @@ export default function NewEventForm({ onCancel, onCreated }) {
         localities: validLocalities.length > 0 ? validLocalities : undefined,
       };
 
-      const createdEvent = await createEvent(payload);
-
-      setSuccess(
-        `Evento "${createdEvent.name}" creado con éxito (ID ${createdEvent.id}).`,
-      );
-      onCreated?.(createdEvent);
-      resetAll();
+      if (isEdit) {
+        const updatedEvent = await updateEvent(initialEvent.id, payload);
+        setSuccess(`Evento "${updatedEvent.name}" actualizado con éxito.`);
+        onUpdated?.(updatedEvent);
+      } else {
+        const createdEvent = await createEvent(payload);
+        setSuccess(`Evento "${createdEvent.name}" creado con éxito (ID ${createdEvent.id}).`);
+        onCreated?.(createdEvent);
+        resetAll();
+      }
     } catch (err) {
-      setError(err.response?.data?.message ?? 'No se pudo crear el evento. Revisa los datos e intenta de nuevo.');
+      setError(err.response?.data?.message ?? `No se pudo ${isEdit ? 'actualizar' : 'crear'} el evento. Revisa los datos e intenta de nuevo.`);
     } finally {
       setLoading(false);
     }
@@ -142,8 +176,10 @@ export default function NewEventForm({ onCancel, onCreated }) {
   return (
     <div className="ef-page">
       <div className="ef-page-header">
-        <h1 className="ef-page-title">Crear nuevo evento</h1>
-        <p className="ef-page-subtitle">Completa los campos para publicar tu evento.</p>
+        <h1 className="ef-page-title">{isEdit ? 'Editar evento' : 'Crear nuevo evento'}</h1>
+        <p className="ef-page-subtitle">
+          {isEdit ? `Editando: ${initialEvent.name}` : 'Completa los campos para publicar tu evento.'}
+        </p>
       </div>
 
       <form className="ef-form" onSubmit={handleSubmit}>
@@ -346,7 +382,7 @@ export default function NewEventForm({ onCancel, onCreated }) {
             Cancelar
           </button>
           <PrimaryButton type="submit" loading={loading}>
-            Crear evento
+            {isEdit ? 'Guardar cambios' : 'Crear evento'}
           </PrimaryButton>
         </div>
 

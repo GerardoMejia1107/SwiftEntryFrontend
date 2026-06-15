@@ -132,3 +132,185 @@
 .ev-badge--draft     { background: #F3F4F6; color: #4B5563; }
 .ev-badge--cancelled { background: #FEE2E2; color: #DC2626; }
 .ev-badge--finished  { background: #DBEAFE; color: #1D4ED8; }
+
+/* ── Actions column ── */
+.ev-col-actions-header {
+  width: 1%;
+}
+
+.ev-col-actions {
+  width: 1%;
+  text-align: right;
+  padding-right: 12px;
+}
+
+/* ── Kebab button ── */
+.ev-kebab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-placeholder);
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ev-kebab:hover {
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+}
+
+/* ── Dropdown menu ── */
+.ev-menu-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.ev-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+}
+
+.ev-menu {
+  position: fixed;
+  z-index: 50;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(30, 27, 75, 0.14);
+  min-width: 130px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ev-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-body);
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+
+.ev-menu-item:hover {
+  background: var(--bg-page);
+  color: var(--text-heading);
+}
+
+.ev-menu-item--danger {
+  color: #DC2626;
+}
+
+.ev-menu-item--danger:hover {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+/* ── Delete confirmation dialog ── */
+.ev-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(30, 27, 75, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.ev-confirm-dialog {
+  background: var(--bg-card);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(30, 27, 75, 0.25);
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ev-confirm-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.ev-confirm-body {
+  font-size: 13.5px;
+  color: var(--text-body);
+  line-height: 1.55;
+}
+
+.ev-confirm-name {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.ev-confirm-error {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #DC2626;
+  background: #FEE2E2;
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+
+.ev-confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.ev-confirm-cancel {
+  padding: 10px 18px;
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-card);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-body);
+  transition: border-color 0.15s;
+}
+
+.ev-confirm-cancel:hover:not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+.ev-confirm-delete {
+  padding: 10px 18px;
+  border: none;
+  background: #DC2626;
+  color: #fff;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  transition: background 0.15s;
+}
+
+.ev-confirm-delete:hover:not(:disabled) {
+  background: #B91C1C;
+}
+
+.ev-confirm-cancel:disabled,
+.ev-confirm-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

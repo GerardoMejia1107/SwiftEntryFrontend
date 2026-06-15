@@ -20,6 +20,17 @@ export const createEvent = async (payload) => {
   return response.data.data;
 };
 
+// PUT /swift_entry/events/:id -> actualiza un evento existente
+export const updateEvent = async (id, payload) => {
+  const response = await api.put(`/events/${id}`, payload);
+  return response.data.data;
+};
+
+// DELETE /swift_entry/events/:id -> elimina un evento
+export const deleteEvent = async (id) => {
+  await api.delete(`/events/${id}`);
+};
+
 // POST /swift_entry/localities -> crea una localidad para un evento existente
 export const createLocality = async (payload) => {
   const response = await api.post('/localities', payload);
