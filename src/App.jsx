@@ -16,11 +16,13 @@ import ConsumerEventsPage from './pages/homeConsumer/ConsumerEventsPage';
 import SeatSelectionPage from './pages/seatSelection/SeatSelectionPage';
 import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
 import ProtectedRoute from './router/ProtectedRoute';
+import SessionExpiredModal from './components/sessionExpired/SessionExpiredModal';
 
 export default function App() {
   return (
     <BrowserRouter>
       <div className="app">
+        <SessionExpiredModal />
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
