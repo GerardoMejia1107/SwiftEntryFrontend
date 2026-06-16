@@ -1,0 +1,195 @@
+/* ── Overlay ── */
+.usd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(30, 27, 75, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+}
+
+/* ── Modal card ── */
+.usd-modal {
+  width: 100%;
+  max-width: 600px;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: 0 24px 60px rgba(30, 27, 75, 0.22);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+}
+
+/* ── Header ── */
+.usd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.usd-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.usd-avatar {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.usd-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.usd-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-heading);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* role badge */
+.usd-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  width: fit-content;
+}
+
+.usd-role--admin     { background: #EDE9FE; color: #6D28D9; }
+.usd-role--organizer { background: #FEF3C7; color: #B45309; }
+.usd-role--user      { background: #CCFBF1; color: #0F766E; }
+
+/* close button */
+.usd-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.usd-close:hover {
+  background: var(--bg-page);
+  color: var(--text-heading);
+}
+
+/* ── Body ── */
+.usd-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 28px 28px;
+}
+
+/* ── Meta grid ── */
+.usd-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 18px;
+  background: var(--bg-page);
+  border-radius: 14px;
+  border: 1px solid var(--border-default);
+}
+
+.usd-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.usd-meta-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.usd-meta-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-heading);
+  word-break: break-all;
+}
+
+/* ── Section ── */
+.usd-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.usd-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.usd-address-line {
+  font-size: 13.5px;
+  color: var(--text-body);
+  line-height: 1.5;
+}
+
+/* ── Timestamps footer ── */
+.usd-timestamps {
+  display: flex;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  padding-top: 4px;
+  border-top: 1px solid var(--border-default);
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .usd-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usd-header,
+  .usd-body {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}

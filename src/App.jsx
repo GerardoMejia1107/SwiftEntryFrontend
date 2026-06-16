@@ -7,6 +7,7 @@ import AdminHomePage from './pages/homeAdmin/AdminHomePage';
 import NewEventPage from './pages/homeAdmin/NewEventPage';
 import EventsPage from './pages/homeAdmin/EventsPage';
 import EditEventPage from './pages/homeAdmin/EditEventPage';
+import UsersPage from './pages/homeAdmin/UsersPage';
 import OrganizerHomePage from './pages/homeOrganizer/OrganizerHomePage';
 import OrganizerEventsPage from './pages/homeOrganizer/OrganizerEventsPage';
 import OrganizerLocalitiesPage from './pages/homeOrganizer/OrganizerLocalitiesPage';
@@ -45,6 +46,11 @@ export default function App() {
           <Route path="/home-admin/events/new" element={
             <ProtectedRoute allowedRoles={['ROLE_ADMINISTRATOR']}>
               <NewEventPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-admin/users" element={
+            <ProtectedRoute allowedRoles={['ROLE_ADMINISTRATOR']}>
+              <UsersPage />
             </ProtectedRoute>
           } />
           <Route path="/home-organizer" element={

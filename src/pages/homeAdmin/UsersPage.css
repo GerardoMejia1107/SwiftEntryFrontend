@@ -1,0 +1,183 @@
+/* ── Toolbar ── */
+.usr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border-default);
+  flex-wrap: wrap;
+}
+
+.usr-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+.usr-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-placeholder);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.usr-search {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-btn);
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.usr-search:focus {
+  border-color: var(--brand-primary);
+}
+
+.usr-search::placeholder {
+  color: var(--text-placeholder);
+}
+
+.usr-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.usr-select {
+  padding: 9px 32px 9px 12px;
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-btn);
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.15s;
+}
+
+.usr-select:focus {
+  border-color: var(--brand-primary);
+}
+
+/* ── Sort buttons ── */
+.usr-sort-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.usr-sort-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-right: 2px;
+}
+
+.usr-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-btn);
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.usr-sort-btn:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.usr-sort-btn--active {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+}
+
+.usr-sort-arrow {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Name cell with mini avatar ── */
+.usr-col-name {
+  font-weight: 700;
+  color: var(--text-heading);
+  min-width: 160px;
+}
+
+.usr-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.usr-avatar-sm {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+  font-size: 12.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Role badge in table ── */
+.usr-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.usr-role--admin     { background: #EDE9FE; color: #6D28D9; }
+.usr-role--organizer { background: #FEF3C7; color: #B45309; }
+.usr-role--user      { background: #CCFBF1; color: #0F766E; }
+
+/* ── Column widths ── */
+.usr-col-email {
+  color: var(--text-muted);
+  font-size: 13px;
+  min-width: 200px;
+}
+
+.usr-col-phone {
+  color: var(--text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* ── Result count ── */
+.usr-count {
+  font-size: 12.5px;
+  color: var(--text-placeholder);
+  text-align: right;
+}
