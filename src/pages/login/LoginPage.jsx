@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthLayout from '../../components/authLayout/AuthLayout';
 import { BrandLogo, InputField, PrimaryButton } from '../../components/formComponents/FormComponents';
-import { loginUser } from '../../api/authService';
+import { login as loginUser } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 import { roleRoutes, DEFAULT_ROUTE } from '../../router/roleRoutes';
 import './LoginPage.css';

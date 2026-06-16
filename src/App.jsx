@@ -10,7 +10,7 @@ import EditEventPage from './pages/homeAdmin/EditEventPage';
 import UsersPage from './pages/homeAdmin/UsersPage';
 import OrganizerHomePage from './pages/homeOrganizer/OrganizerHomePage';
 import OrganizerEventsPage from './pages/homeOrganizer/OrganizerEventsPage';
-import OrganizerLocalitiesPage from './pages/homeOrganizer/OrganizerLocalitiesPage';
+import OrganizerSeatsPage from './pages/homeOrganizer/OrganizerSeatsPage';
 import ConsumerHomePage from './pages/homeConsumer/ConsumerHomePage';
 import ConsumerEventsPage from './pages/homeConsumer/ConsumerEventsPage';
 import SeatSelectionPage from './pages/seatSelection/SeatSelectionPage';
@@ -65,9 +65,9 @@ export default function App() {
               <OrganizerEventsPage />
             </ProtectedRoute>
           } />
-          <Route path="/home-organizer/localities" element={
+          <Route path="/home-organizer/seats" element={
             <ProtectedRoute allowedRoles={['ROLE_ORGANIZER']}>
-              <OrganizerLocalitiesPage />
+              <OrganizerSeatsPage />
             </ProtectedRoute>
           } />
           <Route path="/home-consumer" element={

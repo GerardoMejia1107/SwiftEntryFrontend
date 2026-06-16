@@ -4,7 +4,7 @@ import { BrandLogo } from '../formComponents/FormComponents';
 const NAV_ROUTES = {
   dashboard: '/home-organizer',
   events: '/home-organizer/events',
-  localities: '/home-organizer/localities',
+  seats: '/home-organizer/seats',
 };
 
 const DashboardIcon = () => (
@@ -23,11 +23,12 @@ const EventsIcon = () => (
   </svg>
 );
 
-const LocalitiesIcon = () => (
+const SeatsIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12 2 2 7 12 12 22 7 12 2" />
-    <polyline points="2 17 12 22 22 17" />
-    <polyline points="2 12 12 17 22 12" />
+    <rect x="2" y="7" width="20" height="11" rx="2" />
+    <path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" />
+    <line x1="6" y1="18" x2="6" y2="21" />
+    <line x1="18" y1="18" x2="18" y2="21" />
   </svg>
 );
 
@@ -48,9 +49,9 @@ const LogoutIcon = () => (
 );
 
 const NAV_ITEMS = [
-  { id: 'dashboard',  label: 'Dashboard',  icon: DashboardIcon  },
-  { id: 'events',     label: 'My Events',  icon: EventsIcon     },
-  { id: 'localities', label: 'Localities', icon: LocalitiesIcon },
+  { id: 'dashboard', label: 'Dashboard',      icon: DashboardIcon },
+  { id: 'events',    label: 'My Events',      icon: EventsIcon    },
+  { id: 'seats',     label: 'Organize Seats', icon: SeatsIcon     },
 ];
 
 export default function OrganizerSidebar({ activeItem, onLogout, mobileOpen, onCloseMobile }) {
@@ -66,7 +67,7 @@ export default function OrganizerSidebar({ activeItem, onLogout, mobileOpen, onC
       <div className="sidebar-brand">
         <BrandLogo size="sm" />
         <div className="sidebar-brand-text">
-          <span className="sidebar-brand-name">VibeTick</span>
+          <span className="sidebar-brand-name">SwiftEntry</span>
           <span className="sidebar-brand-sub">Organizer Portal</span>
         </div>
       </div>

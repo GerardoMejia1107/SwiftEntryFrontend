@@ -1,9 +1,39 @@
+/* ── Grid ────────────────────────────────────────────────── */
 .consumer-events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
   gap: 20px;
 }
 
+/* ── Loading / error / empty state ──────────────────────── */
+.consumer-events-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.consumer-events-state--error {
+  color: #EF4444;
+}
+
+.consumer-events-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Card ────────────────────────────────────────────────── */
 .consumer-event-card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -19,20 +49,57 @@
   transform: translateY(-2px);
 }
 
+.consumer-event-card--inactive {
+  opacity: 0.75;
+}
+
+.consumer-event-card--inactive:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── Card image ──────────────────────────────────────────── */
+.consumer-event-card-image {
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+  background: var(--brand-primary-light);
+}
+
+.consumer-event-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.consumer-event-type--over {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+/* ── Card top (no image) ─────────────────────────────────── */
 .consumer-event-card-top {
   padding: 14px 16px 0;
 }
 
+/* ── Type badge ──────────────────────────────────────────── */
 .consumer-event-type {
+  display: inline-block;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  padding: 3px 8px;
+  border-radius: 20px;
 }
 
+/* ── Card body ───────────────────────────────────────────── */
 .consumer-event-card-body {
-  padding: 8px 16px 16px;
+  padding: 12px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -47,6 +114,17 @@
   line-height: 1.3;
 }
 
+.consumer-event-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .consumer-event-meta {
   display: flex;
   align-items: center;
@@ -55,9 +133,45 @@
   color: var(--text-muted);
 }
 
+.consumer-event-price {
+  font-size: 12.5px;
+  color: var(--text-body);
+  font-weight: 500;
+}
+
+.consumer-event-price strong {
+  color: var(--brand-primary);
+  font-weight: 800;
+}
+
+/* ── Card footer ─────────────────────────────────────────── */
 .consumer-event-card-footer {
   padding: 12px 16px 16px;
   border-top: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.consumer-event-status {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.consumer-event-status--cancelled {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.consumer-event-status--finished {
+  background: #F3F4F6;
+  color: var(--text-muted);
 }
 
 .consumer-event-seats-btn {
@@ -65,7 +179,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  width: 100%;
+  flex: 1;
   padding: 10px 16px;
   background: var(--brand-primary);
   color: #fff;
@@ -78,6 +192,11 @@
   transition: opacity 0.15s, background 0.15s;
 }
 
-.consumer-event-seats-btn:hover {
+.consumer-event-seats-btn:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+.consumer-event-seats-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { InputField, PrimaryButton } from '../../../components/formComponents/FormComponents';
-import { createEvent, updateEvent } from '../../../api/eventService';
+import { useMutation } from '../../../hooks/useMutation';
+import { createEvent, updateEvent } from '../../../api/events';
 import './NewEventModal.css';
 
 const CATEGORIES = ['CONCERT', 'SPORTS', 'THEATER', 'COMEDY', 'CONFERENCE', 'FESTIVAL', 'MOVIE', 'CULTURAL'];
@@ -100,9 +101,13 @@ export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEv
   const [hasAddress, setHasAddress] = useState(() => Boolean(initialEvent?.address));
   const [address, setAddress] = useState(() => fromAddress(initialEvent?.address));
   const [localities, setLocalities] = useState(() => fromLocalities(initialEvent?.localities));
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const { mutate: create, loading: creating, error: createError } = useMutation(createEvent);
+  const { mutate: update, loading: updating, error: updateError } = useMutation(updateEvent);
+
+  const loading = isEdit ? updating : creating;
+  const error = isEdit ? updateError : createError;
 
   const updateForm = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
   const updateAddress = (field) => (e) => setAddress(prev => ({ ...prev, [field]: e.target.value }));
@@ -129,47 +134,43 @@ export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEv
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setSuccess('');
-    setLoading(true);
+
+    const validLocalities = localities
+      .filter((loc) => loc.name.trim() && loc.price !== '')
+      .map((loc) => ({
+        name: loc.name.trim(),
+        description: loc.description.trim() || undefined,
+        price: Number(loc.price),
+      }));
+
+    const payload = {
+      name: form.name,
+      description: form.description || undefined,
+      category: form.category,
+      organizerId: Number(form.organizerId),
+      status: form.status,
+      startDate: withSeconds(form.startDate),
+      endDate: withSeconds(form.endDate),
+      venueName: form.venueName || undefined,
+      imageUrl: form.imageUrl || undefined,
+      address: hasAddress ? { ...address } : undefined,
+      localities: validLocalities.length > 0 ? validLocalities : undefined,
+    };
 
     try {
-      const validLocalities = localities
-        .filter((loc) => loc.name.trim() && loc.price !== '')
-        .map((loc) => ({
-          name: loc.name.trim(),
-          description: loc.description.trim() || undefined,
-          price: Number(loc.price),
-        }));
-
-      const payload = {
-        name: form.name,
-        description: form.description || undefined,
-        category: form.category,
-        organizerId: Number(form.organizerId),
-        status: form.status,
-        startDate: withSeconds(form.startDate),
-        endDate: withSeconds(form.endDate),
-        venueName: form.venueName || undefined,
-        imageUrl: form.imageUrl || undefined,
-        address: hasAddress ? { ...address } : undefined,
-        localities: validLocalities.length > 0 ? validLocalities : undefined,
-      };
-
       if (isEdit) {
-        const updatedEvent = await updateEvent(initialEvent.id, payload);
+        const updatedEvent = await update(initialEvent.id, payload);
         setSuccess(`Evento "${updatedEvent.name}" actualizado con éxito.`);
         onUpdated?.(updatedEvent);
       } else {
-        const createdEvent = await createEvent(payload);
+        const createdEvent = await create(payload);
         setSuccess(`Evento "${createdEvent.name}" creado con éxito (ID ${createdEvent.id}).`);
         onCreated?.(createdEvent);
         resetAll();
       }
-    } catch (err) {
-      setError(err.response?.data?.message ?? `No se pudo ${isEdit ? 'actualizar' : 'crear'} el evento. Revisa los datos e intenta de nuevo.`);
-    } finally {
-      setLoading(false);
+    } catch {
+      // error is already set by useMutation
     }
   };
 

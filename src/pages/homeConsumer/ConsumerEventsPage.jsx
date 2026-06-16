@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ConsumerLayout from '../../components/dashboardLayout/ConsumerLayout';
+import { useConsumerEvents } from '../../hooks/useEvents';
 import './ConsumerEventsPage.css';
 
 const PinIcon = () => (
@@ -23,54 +24,105 @@ const SeatsIcon = () => (
   </svg>
 );
 
-const MOCK_EVENTS = [
-  {
-    id: '1',
-    type: 'LIVE CONCERT',
-    name: 'Neon Horizon World Tour',
-    venue: 'Grand Sphere Arena',
-    date: 'Oct 24, 2024 · 8:00 PM',
-  },
-  {
-    id: '2',
-    type: 'FESTIVAL',
-    name: 'SoundWave Open Air',
-    venue: 'City Park Grounds',
-    date: 'Nov 5, 2024 · 4:00 PM',
-  },
-  {
-    id: '3',
-    type: 'SPORTS',
-    name: 'Championship Finals',
-    venue: 'National Stadium',
-    date: 'Nov 18, 2024 · 7:30 PM',
-  },
-  {
-    id: '4',
-    type: 'THEATER',
-    name: 'A Midsummer Night\'s Dream',
-    venue: 'Royal Arts Theater',
-    date: 'Dec 2, 2024 · 6:00 PM',
-  },
-  {
-    id: '5',
-    type: 'STAND-UP',
-    name: 'Comedy Night Live',
-    venue: 'The Laugh Factory',
-    date: 'Dec 10, 2024 · 9:00 PM',
-  },
-  {
-    id: '6',
-    type: 'LIVE CONCERT',
-    name: 'Retro Beats Revival',
-    venue: 'Sunset Amphitheater',
-    date: 'Jan 14, 2025 · 7:00 PM',
-  },
-];
+const TagIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" />
+  </svg>
+);
+
+const STATUS_LABEL = {
+  PUBLISHED: null,
+  CANCELLED: 'Cancelled',
+  FINISHED:  'Finished',
+};
+
+const formatDate = (iso) => {
+  if (!iso) return null;
+  return new Date(iso).toLocaleString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+};
+
+const minPrice = (localities) => {
+  if (!Array.isArray(localities) || localities.length === 0) return null;
+  const prices = localities.map(l => Number(l.price ?? 0)).filter(p => p > 0);
+  return prices.length > 0 ? Math.min(...prices) : null;
+};
+
+function EventCard({ event, onSelectSeats }) {
+  const isActive = event.status === 'PUBLISHED';
+  const statusLabel = STATUS_LABEL[event.status];
+  const date = formatDate(event.startDate);
+  const price = minPrice(event.localities);
+
+  return (
+    <div className={`consumer-event-card ${!isActive ? 'consumer-event-card--inactive' : ''}`}>
+
+      {event.imageUrl ? (
+        <div className="consumer-event-card-image">
+          <img src={event.imageUrl} alt={event.name} />
+          {event.category && (
+            <span className="consumer-event-type consumer-event-type--over">{event.category}</span>
+          )}
+        </div>
+      ) : (
+        <div className="consumer-event-card-top">
+          {event.category && (
+            <span className="consumer-event-type">{event.category}</span>
+          )}
+        </div>
+      )}
+
+      <div className="consumer-event-card-body">
+        <h3 className="consumer-event-name">{event.name}</h3>
+        {event.description && (
+          <p className="consumer-event-desc">{event.description}</p>
+        )}
+        {event.venueName && (
+          <div className="consumer-event-meta">
+            <PinIcon />
+            {event.venueName}
+          </div>
+        )}
+        {date && (
+          <div className="consumer-event-meta">
+            <CalIcon />
+            {date}
+          </div>
+        )}
+        {price !== null && (
+          <div className="consumer-event-meta consumer-event-price">
+            <TagIcon />
+            From <strong>${price.toFixed(2)}</strong>
+          </div>
+        )}
+      </div>
+
+      <div className="consumer-event-card-footer">
+        {statusLabel && (
+          <span className={`consumer-event-status consumer-event-status--${event.status.toLowerCase()}`}>
+            {statusLabel}
+          </span>
+        )}
+        <button
+          className="consumer-event-seats-btn"
+          onClick={() => onSelectSeats(event.id)}
+          disabled={!isActive}
+        >
+          <SeatsIcon />
+          Select Seats
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function ConsumerEventsPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+
+  const { events, loading, error } = useConsumerEvents();
 
   const handleLogout = () => {
     logout();
@@ -89,35 +141,36 @@ export default function ConsumerEventsPage() {
           </p>
         </header>
 
-        <div className="consumer-events-grid">
-          {MOCK_EVENTS.map(event => (
-            <div key={event.id} className="consumer-event-card">
-              <div className="consumer-event-card-top">
-                <span className="consumer-event-type">{event.type}</span>
-              </div>
-              <div className="consumer-event-card-body">
-                <h3 className="consumer-event-name">{event.name}</h3>
-                <div className="consumer-event-meta">
-                  <PinIcon />
-                  {event.venue}
-                </div>
-                <div className="consumer-event-meta">
-                  <CalIcon />
-                  {event.date}
-                </div>
-              </div>
-              <div className="consumer-event-card-footer">
-                <button
-                  className="consumer-event-seats-btn"
-                  onClick={() => navigate(`/home-consumer/events/${event.id}/seats`)}
-                >
-                  <SeatsIcon />
-                  Select Seats
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading && (
+          <div className="consumer-events-state">
+            <span className="consumer-events-spinner" />
+            <p>Loading events…</p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="consumer-events-state consumer-events-state--error">
+            <p>Could not load events. Please try again later.</p>
+          </div>
+        )}
+
+        {!loading && !error && events.length === 0 && (
+          <div className="consumer-events-state">
+            <p>No events available right now. Check back soon!</p>
+          </div>
+        )}
+
+        {!loading && !error && events.length > 0 && (
+          <div className="consumer-events-grid">
+            {events.map(event => (
+              <EventCard
+                key={event.id}
+                event={event}
+                onSelectSeats={(id) => navigate(`/home-consumer/events/${id}/seats`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </ConsumerLayout>
   );

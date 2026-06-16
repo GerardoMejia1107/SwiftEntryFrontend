@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import StatCard from './StatCard';
-import { getAllEvents } from '../../../api/eventService';
+import { getEvents as getAllEvents } from '../../../api/events';
 import './StatsRow.css';
 
 const RevenueIcon = () => (

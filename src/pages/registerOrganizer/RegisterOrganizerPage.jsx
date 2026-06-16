@@ -209,7 +209,7 @@ export default function RegisterOrganizerPage() {
             <>
               Acepto los{' '}
               <a href="#terms">Términos de Servicio</a> y la{' '}
-              <a href="#privacy">Política de Privacidad</a> de VibeTick Pro.
+              <a href="#privacy">Política de Privacidad</a> de SwiftEntry Pro.
             </>
           }
         />

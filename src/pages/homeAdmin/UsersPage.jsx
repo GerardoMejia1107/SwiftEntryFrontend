@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
-import { getAllUsers } from '../../api/userService';
+import { useUsers } from '../../hooks/useUsers';
 import UserDetailModal, { getRoleName } from './sections/UserDetailModal';
 import './AdminHomePage.css';
 import './UsersPage.css';
@@ -42,9 +42,7 @@ export default function UsersPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { users, loading, error } = useUsers();
 
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -58,18 +56,6 @@ export default function UsersPage() {
     logout();
     navigate('/login', { replace: true });
   };
-
-  useEffect(() => {
-    let cancelled = false;
-    getAllUsers()
-      .then((data) => { if (!cancelled) setUsers(data); })
-      .catch((err) => {
-        if (!cancelled)
-          setError(err.response?.data?.message ?? 'Failed to load users.');
-      })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
 
   const visibleUsers = useMemo(() => {
     let result = [...users];

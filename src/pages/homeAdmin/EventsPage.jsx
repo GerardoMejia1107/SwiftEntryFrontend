@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
-import { getAllEvents, deleteEvent } from '../../api/eventService';
+import { useEvents } from '../../hooks/useEvents';
 import EventDetailModal from './sections/EventDetailModal';
 import './AdminHomePage.css';
 import './EventsPage.css';
@@ -48,9 +48,7 @@ export default function EventsPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { events, loading, error, removeEvent, deleting, deleteError, resetDelete } = useEvents();
 
   // detail modal
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -61,25 +59,11 @@ export default function EventsPage() {
 
   // delete confirm
   const [deletingEvent, setDeletingEvent] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
 
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
   };
-
-  useEffect(() => {
-    let cancelled = false;
-    getAllEvents()
-      .then((data) => { if (!cancelled) setEvents(data); })
-      .catch((err) => {
-        if (!cancelled)
-          setError(err.response?.data?.message ?? 'Error al cargar los eventos.');
-      })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
 
   const openMenu = (e, id) => {
     e.stopPropagation();
@@ -112,22 +96,22 @@ export default function EventsPage() {
   const handleDeleteClick = (e, ev) => {
     e.stopPropagation();
     closeMenu();
-    setDeleteError('');
+    resetDelete();
     setDeletingEvent(ev);
+  };
+
+  const closeDeleteModal = () => {
+    setDeletingEvent(null);
+    resetDelete();
   };
 
   const handleDeleteConfirm = async () => {
     if (!deletingEvent) return;
-    setDeleteLoading(true);
-    setDeleteError('');
     try {
-      await deleteEvent(deletingEvent.id);
-      setEvents((prev) => prev.filter((e) => e.id !== deletingEvent.id));
+      await removeEvent(deletingEvent.id);
       setDeletingEvent(null);
-    } catch (err) {
-      setDeleteError(err.response?.data?.message ?? 'No se pudo eliminar el evento.');
-    } finally {
-      setDeleteLoading(false);
+    } catch {
+      // deleteError already set by useEvents
     }
   };
 
@@ -249,7 +233,7 @@ export default function EventsPage() {
 
       {/* Delete confirmation dialog */}
       {deletingEvent && (
-        <div className="ev-confirm-overlay" onClick={() => !deleteLoading && setDeletingEvent(null)}>
+        <div className="ev-confirm-overlay" onClick={() => !deleting && closeDeleteModal()}>
           <div className="ev-confirm-dialog" onClick={(e) => e.stopPropagation()}>
             <p className="ev-confirm-title">Delete event?</p>
             <p className="ev-confirm-body">
@@ -264,8 +248,8 @@ export default function EventsPage() {
               <button
                 type="button"
                 className="ev-confirm-cancel"
-                onClick={() => setDeletingEvent(null)}
-                disabled={deleteLoading}
+                onClick={closeDeleteModal}
+                disabled={deleting}
               >
                 Cancel
               </button>
@@ -273,9 +257,9 @@ export default function EventsPage() {
                 type="button"
                 className="ev-confirm-delete"
                 onClick={handleDeleteConfirm}
-                disabled={deleteLoading}
+                disabled={deleting}
               >
-                {deleteLoading ? 'Deleting…' : 'Delete'}
+                {deleting ? 'Deleting…' : 'Delete'}
               </button>
             </div>
           </div>

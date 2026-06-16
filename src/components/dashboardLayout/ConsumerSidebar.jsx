@@ -77,7 +77,7 @@ export default function ConsumerSidebar({ activeItem, onLogout, mobileOpen, onCl
       <div className="sidebar-brand">
         <BrandLogo size="sm" />
         <div className="sidebar-brand-text">
-          <span className="sidebar-brand-name">VibeTick</span>
+          <span className="sidebar-brand-name">SwiftEntry</span>
           <span className="sidebar-brand-sub">Consumer Portal</span>
         </div>
       </div>

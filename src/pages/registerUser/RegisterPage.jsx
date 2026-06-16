@@ -6,7 +6,7 @@ import {
   PrimaryButton,
   CheckboxField,
 } from '../../components/formComponents/FormComponents.jsx';
-import { registerUser } from '../../api/authService';
+import { registerUser } from '../../api/auth';
 import './RegisterPage.css';
 
 const BackIcon = () => (
