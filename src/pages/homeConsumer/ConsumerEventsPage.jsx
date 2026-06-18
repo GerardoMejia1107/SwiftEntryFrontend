@@ -107,7 +107,7 @@ function EventCard({ event, onSelectSeats }) {
         )}
         <button
           className="consumer-event-seats-btn"
-          onClick={() => onSelectSeats(event.id)}
+          onClick={() => onSelectSeats(event)}
           disabled={!isActive}
         >
           <SeatsIcon />
@@ -166,7 +166,7 @@ export default function ConsumerEventsPage() {
               <EventCard
                 key={event.id}
                 event={event}
-                onSelectSeats={(id) => navigate(`/home-consumer/events/${id}/seats`)}
+                onSelectSeats={(ev) => navigate(`/home-consumer/events/${ev.id}/seats`, { state: { event: ev } })}
               />
             ))}
           </div>

@@ -300,6 +300,21 @@
   cursor: not-allowed;
 }
 
+.oss-save-btn--success {
+  background: #059669 !important;
+}
+
+.oss-save-error {
+  font-size: 12px;
+  color: #DC2626;
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* ── Map area ────────────────────────────────────────────── */
 .oss-map-area {
   flex: 1;
@@ -528,3 +543,120 @@
   background: var(--bg-page);
   padding: 6px 2px;
 }
+
+/* ── Loading / error states ──────────────────────────────── */
+.oss-localities-loading,
+.oss-localities-error {
+  font-size: 12px;
+  padding: 4px 2px;
+}
+
+.oss-localities-loading {
+  color: var(--text-muted);
+}
+
+.oss-localities-error {
+  color: #EF4444;
+}
+
+.oss-map-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.oss-map-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: oss-spin 0.75s linear infinite;
+}
+
+@keyframes oss-spin {
+  to { transform: rotate(360deg); }
+}
+
+.oss-map-error {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #EF4444;
+  padding: 24px;
+}
+
+/* ── Hover tooltip ───────────────────────────────────────── */
+.oss-tooltip {
+  position: fixed;
+  transform: translate(-50%, calc(-100% - 10px));
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 8px 12px;
+  pointer-events: none;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 110px;
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-main);
+}
+
+.oss-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--border-default);
+}
+
+.oss-tooltip::before {
+  content: '';
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--bg-card);
+  z-index: 1;
+}
+
+.oss-tooltip-seat {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-heading);
+}
+
+.oss-tooltip-locality {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.oss-tooltip-status {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 6px;
+  padding: 2px 6px;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.oss-tooltip-status--available  { background: #D1FAE5; color: #065F46; }
+.oss-tooltip-status--reserved   { background: #FEF3C7; color: #92400E; }
+.oss-tooltip-status--occupied   { background: #FEE2E2; color: #991B1B; }
+.oss-tooltip-status--unassigned { background: var(--bg-page); color: var(--text-muted); }

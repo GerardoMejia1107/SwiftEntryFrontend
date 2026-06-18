@@ -1,49 +1,38 @@
-import { useState, useMemo, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useQuery } from '../../hooks/useQuery';
+import { getSeatMap } from '../../api/seats';
+import { getLocalitiesByEvent } from '../../api/localities';
 import './SeatSelectionPage.css';
-
-// ── Constants ──────────────────────────────────────────────
-const STATUS = {
-  AVAILABLE: 'available',
-  SELECTED: 'selected',
-  SOLD_OUT: 'sold_out',
-  RESERVED: 'reserved',
-};
 
 const ROW_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 const ROWS = 10;
-const COLS = 16;   // 8 left block + 8 right block
+const COLS = 16;
 const COLS_BLOCK = 8;
-const TICKET_PRICE = 45.00;
 const ZOOM_STEP = 0.2;
 const ZOOM_MIN = 1.5;
 const ZOOM_MAX = 2.0;
+const MAX_SEATS = 5;
+const PALETTE = ['#8B5CF6', '#F59E0B', '#3B82F6', '#10B981', '#EF4444', '#EC4899', '#06B6D4', '#84CC16'];
 
-function buildInitialGrid() {
-  // A few demo sold-out and reserved seats scattered across both blocks
-  const soldOut = new Set([
-    '0-0', '0-1', '0-2',
-    '2-6', '2-7', '2-8',
-    '5-13', '5-14',
-    '7-10', '7-11', '7-12',
-  ]);
-  const reserved = new Set([
-    '1-14', '1-15',
-    '4-0', '4-1',
-    '8-5', '8-6',
-  ]);
-
+function buildEmptyGrid() {
   return Array.from({ length: ROWS }, (_, r) =>
-    Array.from({ length: COLS }, (_, c) => {
-      const key = `${r}-${c}`;
-      const status = soldOut.has(key)
-        ? STATUS.SOLD_OUT
-        : reserved.has(key)
-          ? STATUS.RESERVED
-          : STATUS.AVAILABLE;
-      return { id: key, status };
-    })
+    Array.from({ length: COLS }, (_, c) => ({
+      id: `${r}-${c}`,
+      localityId: null,
+      localitySeatId: null,
+      status: null,
+      selected: false,
+    }))
   );
+}
+
+function formatDate(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
 }
 
 // ── Icons ──────────────────────────────────────────────────
@@ -65,15 +54,15 @@ const CalIcon = () => (
   </svg>
 );
 
-const SofaIcon = () => (
-  <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3H2V9z" /><path d="M2 12v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4" /><path d="M6 18v2M18 18v2" /><path d="M2 12h2a2 2 0 0 1 2 2v2H2v-4zM22 12h-2a2 2 0 0 0-2 2v2h4v-4z" />
-  </svg>
-);
-
 const ResetIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+  </svg>
+);
+
+const SofaIcon = () => (
+  <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3H2V9z" /><path d="M2 12v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4" /><path d="M6 18v2M18 18v2" /><path d="M2 12h2a2 2 0 0 1 2 2v2H2v-4zM22 12h-2a2 2 0 0 0-2 2v2h4v-4z" />
   </svg>
 );
 
@@ -83,128 +72,295 @@ const TicketIcon = () => (
   </svg>
 );
 
-// ── Mock event data ─────────────────────────────────────────
-const MOCK_EVENT = {
-  type: 'LIVE CONCERT',
-  name: 'Neon Horizon World Tour',
-  venue: 'Grand Sphere Arena',
-  date: 'Oct 24, 2024 · 8:00 PM',
-};
+const XIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
 
-// ── Main component ──────────────────────────────────────────
 export default function SeatSelectionPage() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const event = location.state?.event ?? null;
 
-  const [grid, setGrid] = useState(buildInitialGrid);
+  useEffect(() => {
+    if (!event) navigate('/home-consumer/events', { replace: true });
+  }, [event, navigate]);
+
+  const [grid, setGrid] = useState(buildEmptyGrid);
   const [zoom, setZoom] = useState(1.8);
+  const [tooltip, setTooltip] = useState(null);
 
-  // Derive seat label: row letter + global column number (1-16)
+  // ── Remote data ────────────────────────────────────────────
+  const { data: rawLocalities, loading: localitiesLoading, error: localitiesError } = useQuery(
+    () => eventId ? getLocalitiesByEvent(Number(eventId)) : Promise.resolve([]),
+    [eventId]
+  );
+
+  const { data: seatMapData, loading: seatMapLoading, error: seatMapError } = useQuery(
+    () => eventId ? getSeatMap(Number(eventId)) : Promise.resolve([]),
+    [eventId]
+  );
+
+  const localities = useMemo(
+    () => (rawLocalities ?? []).map(loc => ({ ...loc, color: PALETTE[loc.id % PALETTE.length] })),
+    [rawLocalities]
+  );
+
+  const localityById = useMemo(
+    () => Object.fromEntries(localities.map(l => [l.id, l])),
+    [localities]
+  );
+
+  // Sync grid from backend seat map
+  useEffect(() => {
+    if (!seatMapData) return;
+    const lookup = {};
+    seatMapData.forEach(s => { lookup[`${s.row}${s.col}`] = s; });
+
+    setGrid(
+      Array.from({ length: ROWS }, (_, r) =>
+        Array.from({ length: COLS }, (_, c) => {
+          const row = ROW_LABELS[r];
+          const col = String(c + 1);
+          const data = lookup[`${row}${col}`] ?? {};
+          return {
+            id: `${r}-${c}`,
+            localityId: data.localityId ?? null,
+            localitySeatId: data.localitySeatId ?? null,
+            status: data.status ?? null,
+            selected: false,
+          };
+        })
+      )
+    );
+  }, [seatMapData]);
+
+  // ── Derived ────────────────────────────────────────────────
   const seatLabel = (r, c) => `${ROW_LABELS[r]}${c + 1}`;
 
   const selectedSeats = useMemo(() => {
     const seats = [];
     grid.forEach((row, r) =>
       row.forEach((seat, c) => {
-        if (seat.status === STATUS.SELECTED)
-          seats.push({ label: seatLabel(r, c), r, c });
+        if (!seat.selected) return;
+        const loc = localityById[seat.localityId];
+        seats.push({
+          key: seat.id,
+          label: seatLabel(r, c),
+          localityName: loc?.name ?? '',
+          localityColor: loc?.color ?? '#ccc',
+          price: Number(loc?.price ?? 0),
+          localitySeatId: seat.localitySeatId,
+        });
       })
     );
     return seats;
-  }, [grid]);
+  }, [grid, localityById]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const subtotal = selectedSeats.length * TICKET_PRICE;
+  const selectedCount = selectedSeats.length;
+  const subtotal = selectedSeats.reduce((sum, s) => sum + s.price, 0);
 
+  const isLoading = localitiesLoading || seatMapLoading;
+  const loadError = localitiesError ?? seatMapError ?? null;
+
+  // ── Interactions ───────────────────────────────────────────
   const handleSeatClick = useCallback((r, c) => {
     setGrid(prev => {
       const seat = prev[r][c];
-      if (seat.status === STATUS.SOLD_OUT || seat.status === STATUS.RESERVED) return prev;
-      const next = seat.status === STATUS.AVAILABLE ? STATUS.SELECTED : STATUS.AVAILABLE;
+      if (!seat.localityId || seat.status !== 'AVAILABLE') return prev;
+      if (!seat.selected && selectedCount >= MAX_SEATS) return prev;
       return prev.map((row, ri) =>
-        ri !== r ? row : row.map((s, ci) => (ci !== c ? s : { ...s, status: next }))
+        ri !== r ? row : row.map((s, ci) =>
+          ci !== c ? s : { ...s, selected: !s.selected }
+        )
       );
     });
+  }, [selectedCount]);
+
+  const handleDeselect = useCallback((localitySeatId) => {
+    setGrid(prev =>
+      prev.map(row =>
+        row.map(seat =>
+          seat.localitySeatId === localitySeatId ? { ...seat, selected: false } : seat
+        )
+      )
+    );
   }, []);
 
-  const zoomIn = () => setZoom(z => Math.min(ZOOM_MAX, parseFloat((z + ZOOM_STEP).toFixed(1))));
-  const zoomOut = () => setZoom(z => Math.max(ZOOM_MIN, parseFloat((z - ZOOM_STEP).toFixed(1))));
-  const zoomReset = () => setZoom(1);
+  const handleMouseEnter = useCallback((e, seat, r, c) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const loc = seat.localityId != null ? localityById[seat.localityId] : null;
+    setTooltip({
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+      label: seatLabel(r, c),
+      localityName: loc?.name ?? null,
+      status: seat.selected ? 'SELECTED' : (seat.status ?? null),
+    });
+  }, [localityById]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Flat seat lists for each block
-  const leftSeats = grid.flatMap((row, r) => row.slice(0, COLS_BLOCK).map((seat, c) => ({ seat, r, c })));
+  const handleMouseLeave = useCallback(() => setTooltip(null), []);
+
+  const zoomIn    = () => setZoom(z => Math.min(ZOOM_MAX, parseFloat((z + ZOOM_STEP).toFixed(1))));
+  const zoomOut   = () => setZoom(z => Math.max(ZOOM_MIN, parseFloat((z - ZOOM_STEP).toFixed(1))));
+  const zoomReset = () => setZoom(1.8);
+
+  const leftSeats  = grid.flatMap((row, r) => row.slice(0, COLS_BLOCK).map((seat, c) => ({ seat, r, c })));
   const rightSeats = grid.flatMap((row, r) => row.slice(COLS_BLOCK).map((seat, c) => ({ seat, r, c: c + COLS_BLOCK })));
+
+  const getSeatClass = (seat) => {
+    if (!seat.localityId) return 'ss-seat ss-seat--unassigned';
+    if (seat.selected)    return 'ss-seat ss-seat--selected';
+    if (seat.status === 'RESERVED') return 'ss-seat ss-seat--reserved';
+    if (seat.status === 'OCCUPIED') return 'ss-seat ss-seat--occupied';
+    // available but at limit — dim it
+    if (selectedCount >= MAX_SEATS) return 'ss-seat ss-seat--available ss-seat--dimmed';
+    return 'ss-seat ss-seat--available';
+  };
+
+  const getSeatStyle = (seat) => {
+    if (seat.selected) return { backgroundColor: 'var(--brand-primary)' };
+    if (seat.localityId && seat.status === 'AVAILABLE') {
+      const loc = localityById[seat.localityId];
+      return loc ? { backgroundColor: loc.color } : undefined;
+    }
+    return undefined;
+  };
+
+  const isSeatDisabled = (seat) => {
+    if (!seat.localityId) return true;
+    if (seat.status !== 'AVAILABLE') return true;
+    if (!seat.selected && selectedCount >= MAX_SEATS) return true;
+    return false;
+  };
+
+  const STATUS_TOOLTIP = { SELECTED: 'Selected', AVAILABLE: 'Available', RESERVED: 'Reserved', OCCUPIED: 'Occupied' };
+
+  if (!event) return null;
 
   return (
     <div className="ss-page">
 
+      {/* ── Hover tooltip ── */}
+      {tooltip && (
+        <div className="ss-tooltip" style={{ left: tooltip.x, top: tooltip.y }} role="tooltip">
+          <span className="ss-tooltip-seat">{tooltip.label}</span>
+          {tooltip.localityName && <span className="ss-tooltip-locality">{tooltip.localityName}</span>}
+          <span className={`ss-tooltip-status ss-tooltip-status--${(tooltip.status ?? 'unassigned').toLowerCase()}`}>
+            {STATUS_TOOLTIP[tooltip.status] ?? 'Unassigned'}
+          </span>
+        </div>
+      )}
+
       {/* ── Sidebar ── */}
       <aside className="ss-sidebar">
         <div className="ss-sidebar-header">
-          <button
-            type="button"
-            className="ss-back-btn"
-            onClick={() => navigate('/home-consumer/events')}
-            aria-label="Back to events"
-          >
+          <button type="button" className="ss-back-btn" onClick={() => navigate('/home-consumer/events')} aria-label="Back">
             <BackIcon />
           </button>
           <span className="ss-header-title">Seat Selection</span>
         </div>
 
         <div className="ss-sidebar-body">
+
+          {/* Event info */}
           <div className="ss-event-info">
-            <span className="ss-event-type">{MOCK_EVENT.type}</span>
-            <h2 className="ss-event-name">{MOCK_EVENT.name}</h2>
-            <div className="ss-event-meta"><PinIcon />{MOCK_EVENT.venue}</div>
-            <div className="ss-event-meta"><CalIcon />{MOCK_EVENT.date}</div>
+            {event.category && <span className="ss-event-type">{event.category}</span>}
+            <h2 className="ss-event-name">{event.name}</h2>
+            {event.venueName && <div className="ss-event-meta"><PinIcon />{event.venueName}</div>}
+            {event.startDate && <div className="ss-event-meta"><CalIcon />{formatDate(event.startDate)}</div>}
           </div>
 
-          <div className="ss-key">
-            <p className="ss-section-title">Seat Key</p>
-            <div className="ss-key-grid">
-              <div className="ss-key-item"><span className="ss-swatch ss-swatch--available" />Available</div>
-              <div className="ss-key-item"><span className="ss-swatch ss-swatch--selected" />Selected</div>
-              <div className="ss-key-item"><span className="ss-swatch ss-swatch--sold_out" />Sold Out</div>
-              <div className="ss-key-item"><span className="ss-swatch ss-swatch--reserved" />Reserved</div>
+          {/* Localities legend */}
+          {!isLoading && !loadError && localities.length > 0 && (
+            <div className="ss-localities-legend">
+              <p className="ss-section-title">Localities</p>
+              <div className="ss-legend-list">
+                {localities.map(loc => (
+                  <div key={loc.id} className="ss-legend-item">
+                    <span className="ss-legend-swatch" style={{ backgroundColor: loc.color }} />
+                    <span className="ss-legend-name">{loc.name}</span>
+                    {loc.price != null && (
+                      <span className="ss-legend-price">${Number(loc.price).toFixed(2)}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Compact seat key */}
+              <div className="ss-key-row">
+                <span className="ss-key-item"><span className="ss-swatch ss-swatch--selected" />Selected</span>
+                <span className="ss-key-item"><span className="ss-swatch ss-swatch--reserved" />Reserved</span>
+                <span className="ss-key-item"><span className="ss-swatch ss-swatch--occupied" />Occupied</span>
+              </div>
             </div>
-          </div>
+          )}
 
+          {/* Selected seats */}
           <div className="ss-selected-section">
             <div className="ss-selected-header">
               <p className="ss-section-title">Selected Seats</p>
-              <span className="ss-count-badge">{selectedSeats.length}</span>
+              <span className={`ss-count-badge ${selectedCount >= MAX_SEATS ? 'ss-count-badge--full' : ''}`}>
+                {selectedCount}/{MAX_SEATS}
+              </span>
             </div>
+
+            {selectedCount >= MAX_SEATS && (
+              <p className="ss-limit-notice">Maximum of {MAX_SEATS} seats reached.</p>
+            )}
 
             {selectedSeats.length === 0 ? (
               <div className="ss-empty-seats">
                 <span className="ss-sofa-icon"><SofaIcon /></span>
-                <p className="ss-hint">Select seats from the map to continue</p>
+                <p className="ss-hint">Click available seats on the map to add them here.</p>
               </div>
             ) : (
               <div className="ss-selected-list">
                 {selectedSeats.map(s => (
-                  <div key={s.label} className="ss-selected-item">
-                    <span className="ss-selected-label"><TicketIcon /> Seat {s.label}</span>
-                    <span className="ss-selected-price">${TICKET_PRICE.toFixed(2)}</span>
+                  <div key={s.key} className="ss-selected-item">
+                    <span className="ss-selected-label">
+                      <TicketIcon />
+                      <span>
+                        Seat {s.label}
+                        <span className="ss-selected-locality" style={{ color: s.localityColor }}>
+                          {s.localityName}
+                        </span>
+                      </span>
+                    </span>
+                    <div className="ss-selected-right">
+                      <span className="ss-selected-price">${s.price.toFixed(2)}</span>
+                      <button
+                        type="button"
+                        className="ss-deselect-btn"
+                        onClick={() => handleDeselect(s.localitySeatId)}
+                        aria-label={`Remove seat ${s.label}`}
+                      >
+                        <XIcon />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
+
         </div>
 
+        {/* Footer */}
         <div className="ss-sidebar-footer">
           <div className="ss-subtotal-row">
             <span className="ss-subtotal-label">Subtotal</span>
             <span className="ss-subtotal-amount">${subtotal.toFixed(2)}</span>
           </div>
-          <p className="ss-tax-note">Incl. taxes</p>
+          <p className="ss-tax-note">Incl. taxes &amp; fees</p>
           <button
             className="ss-checkout-btn"
             disabled={selectedSeats.length === 0}
-            onClick={() => { }}
+            onClick={() => { /* reservation logic TBD */ }}
           >
-            Review &amp; Checkout
+            Reserve {selectedCount > 0 ? `(${selectedCount})` : ''}
           </button>
         </div>
       </aside>
@@ -218,80 +374,92 @@ export default function SeatSelectionPage() {
         </div>
 
         <div className="ss-zoom-controls">
-          <button className="ss-zoom-btn" onClick={zoomIn} aria-label="Zoom in">+</button>
+          <button className="ss-zoom-btn" onClick={zoomIn}  aria-label="Zoom in">+</button>
           <button className="ss-zoom-btn" onClick={zoomOut} aria-label="Zoom out">−</button>
           <button className="ss-zoom-btn" onClick={zoomReset} aria-label="Reset zoom"><ResetIcon /></button>
         </div>
 
-        <div className="ss-grid-viewport">
-          <div className="ss-grid-scaler" style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
+        {isLoading && (
+          <div className="ss-map-state">
+            <span className="ss-map-spinner" />
+            <span>Loading seat map…</span>
+          </div>
+        )}
 
-            {/* Column number header */}
-            <div className="ss-col-header">
-              <span className="ss-col-header-spacer" />
-              <div className="ss-col-nums">
-                {Array.from({ length: COLS_BLOCK }, (_, i) => (
-                  <span key={i} className="ss-col-num">{i + 1}</span>
-                ))}
-              </div>
-              <span className="ss-aisle-header" />
-              <div className="ss-col-nums">
-                {Array.from({ length: COLS_BLOCK }, (_, i) => (
-                  <span key={i} className="ss-col-num">{i + COLS_BLOCK + 1}</span>
-                ))}
-              </div>
-              <span className="ss-col-header-spacer" />
-            </div>
+        {!isLoading && loadError && (
+          <div className="ss-map-state ss-map-state--error">Failed to load seat map.</div>
+        )}
 
-            {/* Main grid */}
-            <div className="ss-matrix">
+        {!isLoading && !loadError && (
+          <div className="ss-grid-viewport">
+            <div className="ss-grid-scaler" style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
 
-              {/* Left row labels */}
-              <div className="ss-row-labels">
-                {ROW_LABELS.map(l => <span key={l} className="ss-row-label">{l}</span>)}
-              </div>
-
-              {/* Left block */}
-              <div className="ss-block">
-                {leftSeats.map(({ seat, r, c }) => (
-                  <button
-                    key={seat.id}
-                    className={`ss-seat ss-seat--${seat.status}`}
-                    onClick={() => handleSeatClick(r, c)}
-                    disabled={seat.status === STATUS.SOLD_OUT || seat.status === STATUS.RESERVED}
-                    title={`${seatLabel(r, c)} — ${seat.status.replace('_', ' ')}`}
-                    aria-label={`Seat ${seatLabel(r, c)}`}
-                  />
-                ))}
+              {/* Column number header */}
+              <div className="ss-col-header">
+                <span className="ss-col-header-spacer" />
+                <div className="ss-col-nums">
+                  {Array.from({ length: COLS_BLOCK }, (_, i) => (
+                    <span key={i} className="ss-col-num">{i + 1}</span>
+                  ))}
+                </div>
+                <span className="ss-aisle-header" />
+                <div className="ss-col-nums">
+                  {Array.from({ length: COLS_BLOCK }, (_, i) => (
+                    <span key={i} className="ss-col-num">{i + COLS_BLOCK + 1}</span>
+                  ))}
+                </div>
+                <span className="ss-col-header-spacer" />
               </div>
 
-              {/* Aisle / road */}
-              <div className="ss-aisle">
-                <span className="ss-aisle-label">AISLE</span>
-              </div>
+              {/* Main grid */}
+              <div className="ss-matrix">
 
-              {/* Right block */}
-              <div className="ss-block">
-                {rightSeats.map(({ seat, r, c }) => (
-                  <button
-                    key={seat.id}
-                    className={`ss-seat ss-seat--${seat.status}`}
-                    onClick={() => handleSeatClick(r, c)}
-                    disabled={seat.status === STATUS.SOLD_OUT || seat.status === STATUS.RESERVED}
-                    title={`${seatLabel(r, c)} — ${seat.status.replace('_', ' ')}`}
-                    aria-label={`Seat ${seatLabel(r, c)}`}
-                  />
-                ))}
-              </div>
+                <div className="ss-row-labels">
+                  {ROW_LABELS.map(l => <span key={l} className="ss-row-label">{l}</span>)}
+                </div>
 
-              {/* Right row labels */}
-              <div className="ss-row-labels">
-                {ROW_LABELS.map(l => <span key={l} className="ss-row-label">{l}</span>)}
-              </div>
+                <div className="ss-block">
+                  {leftSeats.map(({ seat, r, c }) => (
+                    <button
+                      key={seat.id}
+                      className={getSeatClass(seat)}
+                      style={getSeatStyle(seat)}
+                      onClick={() => handleSeatClick(r, c)}
+                      onMouseEnter={(e) => handleMouseEnter(e, seat, r, c)}
+                      onMouseLeave={handleMouseLeave}
+                      disabled={isSeatDisabled(seat)}
+                      aria-label={`Seat ${seatLabel(r, c)}`}
+                    />
+                  ))}
+                </div>
 
+                <div className="ss-aisle">
+                  <span className="ss-aisle-label">AISLE</span>
+                </div>
+
+                <div className="ss-block">
+                  {rightSeats.map(({ seat, r, c }) => (
+                    <button
+                      key={seat.id}
+                      className={getSeatClass(seat)}
+                      style={getSeatStyle(seat)}
+                      onClick={() => handleSeatClick(r, c)}
+                      onMouseEnter={(e) => handleMouseEnter(e, seat, r, c)}
+                      onMouseLeave={handleMouseLeave}
+                      disabled={isSeatDisabled(seat)}
+                      aria-label={`Seat ${seatLabel(r, c)}`}
+                    />
+                  ))}
+                </div>
+
+                <div className="ss-row-labels">
+                  {ROW_LABELS.map(l => <span key={l} className="ss-row-label">{l}</span>)}
+                </div>
+
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
       </main>
     </div>

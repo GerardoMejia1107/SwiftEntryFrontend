@@ -314,3 +314,23 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ── Manage Seats button ───────────────────────────────────── */
+.ev-seats-btn {
+  padding: 5px 12px;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  border: 1.5px solid var(--brand-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ev-seats-btn:hover {
+  background: var(--brand-primary);
+  color: #fff;
+}

@@ -34,6 +34,11 @@ export default function OrganizerEventsPage() {
     navigate('/login', { replace: true });
   };
 
+  const handleManageSeats = (e, ev) => {
+    e.stopPropagation();
+    navigate('/home-organizer/seats', { state: { event: ev } });
+  };
+
   return (
     <OrganizerLayout user={auth?.user} activeItem="events" onLogout={handleLogout}>
       <div className="admin-page">
@@ -73,6 +78,7 @@ export default function OrganizerEventsPage() {
                     <th>Start date</th>
                     <th>End date</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -91,6 +97,15 @@ export default function OrganizerEventsPage() {
                         <span className={`ev-badge ${STATUS_CLASS[ev.status] ?? ''}`}>
                           {ev.status}
                         </span>
+                      </td>
+                      <td>
+                        <button
+                          className="ev-seats-btn"
+                          onClick={(e) => handleManageSeats(e, ev)}
+                          title="Manage seat map for this event"
+                        >
+                          Manage Seats
+                        </button>
                       </td>
                     </tr>
                   ))}
