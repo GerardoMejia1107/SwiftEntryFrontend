@@ -10,3 +10,8 @@ export function useMyReservations() {
   const { data, loading, error, refetch } = useQuery(reservationsApi.getMyReservations);
   return { reservations: data ?? [], loading, error, refetch };
 }
+
+export function useOrganizerReservations() {
+  const { data, loading, error, refetch } = useQuery(reservationsApi.getOrganizerReservations);
+  return { reservations: data ?? [], loading, error, refetch };
+}

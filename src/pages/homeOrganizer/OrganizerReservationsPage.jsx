@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import DashboardLayout from '../../components/dashboardLayout/DashboardLayout';
-import { useAllReservations } from '../../hooks/useReservations';
-import ReservationDetailModal from './sections/ReservationDetailModal';
-import './AdminHomePage.css';
-import './EventsPage.css';
-import './UsersPage.css';
-import './ReservationsPage.css';
+import OrganizerLayout from '../../components/dashboardLayout/OrganizerLayout';
+import { useOrganizerReservations } from '../../hooks/useReservations';
+import ReservationDetailModal from '../homeAdmin/sections/ReservationDetailModal';
+import '../homeAdmin/AdminHomePage.css';
+import '../homeAdmin/EventsPage.css';
+import '../homeAdmin/UsersPage.css';
+import '../homeAdmin/ReservationsPage.css';
 
 const STATUS_BADGE = {
   PENDING:   { label: 'Pending',   cls: 'rsv-badge--pending'   },
@@ -55,10 +55,10 @@ const formatAmount = (val) => {
   return `$${Number(val).toFixed(2)}`;
 };
 
-export default function ReservationsPage() {
+export default function OrganizerReservationsPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
-  const { reservations, loading, error } = useAllReservations();
+  const { reservations, loading, error } = useOrganizerReservations();
 
   const [selected, setSelected]         = useState(null);
   const [search, setSearch]             = useState('');
@@ -92,8 +92,8 @@ export default function ReservationsPage() {
       if (sortField === 'id')         { return sortAsc ? a.id - b.id : b.id - a.id; }
       if (sortField === 'total')      { av = Number(a.totalAmount ?? 0); bv = Number(b.totalAmount ?? 0); return sortAsc ? av - bv : bv - av; }
       if (sortField === 'reservedAt') { av = a.reservedAt ?? ''; bv = b.reservedAt ?? ''; }
-      if (sortField === 'user')       { av = (a.userName ?? '').toLowerCase(); bv = (b.userName ?? '').toLowerCase(); }
-      if (sortField === 'status')     { av = a.status ?? ''; bv = b.status ?? ''; }
+      else if (sortField === 'user')  { av = (a.userName ?? '').toLowerCase(); bv = (b.userName ?? '').toLowerCase(); }
+      else                            { av = a.status ?? ''; bv = b.status ?? ''; }
       if (av < bv) return sortAsc ? -1 : 1;
       if (av > bv) return sortAsc ?  1 : -1;
       return 0;
@@ -108,15 +108,11 @@ export default function ReservationsPage() {
   };
 
   return (
-    <DashboardLayout
-      user={auth?.user}
-      activeItem="reservations"
-      onLogout={handleLogout}
-    >
+    <OrganizerLayout user={auth?.user} activeItem="reservations" onLogout={handleLogout}>
       <div className="admin-page">
         <header className="admin-page-header">
-          <h1 className="admin-page-title">All Reservations</h1>
-          <p className="admin-page-subtitle">Every reservation on the platform.</p>
+          <h1 className="admin-page-title">My Events' Reservations</h1>
+          <p className="admin-page-subtitle">All reservations made for events you organize.</p>
         </header>
 
         <div className="ev-card">
@@ -180,7 +176,7 @@ export default function ReservationsPage() {
 
           {!loading && !error && reservations.length === 0 && (
             <div className="ev-state">
-              <p className="ev-state-text">No reservations found.</p>
+              <p className="ev-state-text">No reservations found for your events.</p>
             </div>
           )}
 
@@ -247,10 +243,10 @@ export default function ReservationsPage() {
       {selected && (
         <ReservationDetailModal
           reservation={selected}
-          variant="admin"
+          variant="organizer"
           onClose={() => setSelected(null)}
         />
       )}
-    </DashboardLayout>
+    </OrganizerLayout>
   );
 }

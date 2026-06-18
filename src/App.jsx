@@ -12,6 +12,7 @@ import ReservationsPage from './pages/homeAdmin/ReservationsPage';
 import OrganizerHomePage from './pages/homeOrganizer/OrganizerHomePage';
 import OrganizerEventsPage from './pages/homeOrganizer/OrganizerEventsPage';
 import OrganizerSeatsPage from './pages/homeOrganizer/OrganizerSeatsPage';
+import OrganizerReservationsPage from './pages/homeOrganizer/OrganizerReservationsPage';
 import ConsumerHomePage from './pages/homeConsumer/ConsumerHomePage';
 import ConsumerEventsPage from './pages/homeConsumer/ConsumerEventsPage';
 import ConsumerReservationsPage from './pages/homeConsumer/ConsumerReservationsPage';
@@ -75,6 +76,11 @@ export default function App() {
           <Route path="/home-organizer/seats" element={
             <ProtectedRoute allowedRoles={['ROLE_ORGANIZER']}>
               <OrganizerSeatsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-organizer/reservations" element={
+            <ProtectedRoute allowedRoles={['ROLE_ORGANIZER']}>
+              <OrganizerReservationsPage />
             </ProtectedRoute>
           } />
           <Route path="/home-consumer" element={

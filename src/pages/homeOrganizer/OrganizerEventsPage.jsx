@@ -78,7 +78,7 @@ export default function OrganizerEventsPage() {
                     <th>Start date</th>
                     <th>End date</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th className="ev-col-actions-header">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -98,13 +98,18 @@ export default function OrganizerEventsPage() {
                           {ev.status}
                         </span>
                       </td>
-                      <td>
+                      <td className="ev-col-actions">
                         <button
-                          className="ev-seats-btn"
+                          className="ev-kebab"
                           onClick={(e) => handleManageSeats(e, ev)}
-                          title="Manage seat map for this event"
+                          title="Manage seats"
                         >
-                          Manage Seats
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="7" width="20" height="11" rx="2" />
+                            <path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" />
+                            <line x1="6" y1="18" x2="6" y2="21" />
+                            <line x1="18" y1="18" x2="18" y2="21" />
+                          </svg>
                         </button>
                       </td>
                     </tr>
