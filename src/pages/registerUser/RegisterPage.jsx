@@ -45,26 +45,6 @@ const EyeIcon = ({ open }) => (
   </svg>
 );
 
-const PersonIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
-);
-
-const IdIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="5" width="20" height="14" rx="2" />
-    <path d="M8 10h.01M8 14h.01M12 10h4M12 14h4" />
-  </svg>
-);
-
-const PhoneIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.45 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.29 6.29l1.12-.85a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-  </svg>
-);
-
 const CalendarIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -74,8 +54,27 @@ const CalendarIcon = () => (
   </svg>
 );
 
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const STEPS = [
+  { label: 'Personal' },
+  { label: 'Cuenta' },
+  { label: 'Dirección' },
+];
+
+const STEP_FIELDS = [
+  ['nombre', 'apellido', 'fechaNacimiento'],
+  ['email', 'password', 'dui', 'telefono'],
+  ['streetAddress', 'municipality', 'department', 'country'],
+];
+
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     nombre: '',
     apellido: '',
@@ -92,12 +91,32 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const update = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
 
+  const validateStep = (s = step) => {
+    const newErrors = {};
+    STEP_FIELDS[s].forEach(f => {
+      if (!form[f]) newErrors[f] = 'Requerido';
+    });
+    if (s === 2 && !accepted) newErrors.accepted = 'Debes aceptar los términos';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const goNext = () => {
+    if (validateStep()) setStep(s => s + 1);
+  };
+
+  const goBack = () => {
+    setErrors({});
+    setStep(s => s - 1);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!accepted) return;
+    if (!validateStep()) return;
 
     setLoading(true);
 
@@ -109,7 +128,7 @@ export default function RegisterPage() {
       dui: form.dui,
       phoneNumber: form.telefono,
       birthDate: form.fechaNacimiento,
-      roleId: 2,
+      roleId: 3,
       address: {
         streetAddress: form.streetAddress,
         municipality: form.municipality,
@@ -151,133 +170,130 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <form className="register-form" onSubmit={handleSubmit}>
-        <div className="form-row">
-          <InputField
-            id="nombre"
-            label="Nombre"
-            placeholder="Ej. Juan"
-            value={form.nombre}
-            onChange={update('nombre')}
-            required
-          />
-          <InputField
-            id="apellido"
-            label="Apellido"
-            placeholder="Ej. Pérez"
-            value={form.apellido}
-            onChange={update('apellido')}
-            required
-          />
-        </div>
+      <div className="step-indicator">
+        {STEPS.map((s, i) => (
+          <>
+            <div key={i} className="step-item">
+              <div className={`step-dot ${i < step ? 'step-dot--done' : ''} ${i === step ? 'step-dot--active' : ''}`}>
+                {i < step ? <CheckIcon /> : i + 1}
+              </div>
+              <span className={`step-label ${i === step ? 'step-label--active' : ''}`}>{s.label}</span>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div key={`connector-${i}`} className={`step-connector ${i < step ? 'step-connector--done' : ''}`} />
+            )}
+          </>
+        ))}
+      </div>
 
-        <InputField
-          id="email"
-          label="Correo electrónico"
-          type="email"
-          placeholder="nombre@ejemplo.com"
-          value={form.email}
-          onChange={update('email')}
-          icon={<MailIcon />}
-          required
-        />
-
-        <InputField
-          id="password"
-          label="Contraseña"
-          type={showPassword ? 'text' : 'password'}
-          placeholder="Mínimo 8 caracteres"
-          value={form.password}
-          onChange={update('password')}
-          icon={<LockIcon />}
-          rightIcon={<EyeIcon open={showPassword} />}
-          onRightIconClick={() => setShowPassword(v => !v)}
-          required
-        />
-
-        <div className="form-row">
-          <InputField
-            id="dui"
-            label="DUI"
-            placeholder="00000000-0"
-            value={form.dui}
-            onChange={update('dui')}
-            required
-          />
-          <InputField
-            id="telefono"
-            label="Teléfono"
-            type="tel"
-            placeholder="7000-0000"
-            value={form.telefono}
-            onChange={update('telefono')}
-            required
-          />
-        </div>
-
-        <InputField
-          id="fechaNacimiento"
-          label="Fecha de nacimiento"
-          type="date"
-          value={form.fechaNacimiento}
-          onChange={update('fechaNacimiento')}
-          icon={<CalendarIcon />}
-          required
-        />
-
-        <InputField
-          id="streetAddress"
-          label="Dirección"
-          placeholder="Calle, número, colonia"
-          value={form.streetAddress}
-          onChange={update('streetAddress')}
-          required
-        />
-
-        <div className="form-row">
-          <InputField
-            id="municipality"
-            label="Municipio"
-            placeholder="Ej. San Salvador"
-            value={form.municipality}
-            onChange={update('municipality')}
-            required
-          />
-          <InputField
-            id="department"
-            label="Departamento"
-            placeholder="Ej. San Salvador"
-            value={form.department}
-            onChange={update('department')}
-            required
-          />
-        </div>
-
-        <InputField
-          id="country"
-          label="País"
-          placeholder="Ej. El Salvador"
-          value={form.country}
-          onChange={update('country')}
-          required
-        />
-
-        <CheckboxField
-          id="terms"
-          checked={accepted}
-          onChange={(e) => setAccepted(e.target.checked)}
-          label={
+      <form className="register-form" onSubmit={handleSubmit} noValidate>
+        <div className="step-panel" key={step}>
+          {step === 0 && (
             <>
-              Al crear una cuenta, acepto los{' '}
-              <a href="#terms">Términos de Servicio</a> y la{' '}
-              <a href="#privacy">Política de Privacidad</a>.
+              <div className="form-row">
+                <InputField
+                  id="nombre" label="Nombre" placeholder="Ej. Juan"
+                  value={form.nombre} onChange={update('nombre')} required error={errors.nombre}
+                />
+                <InputField
+                  id="apellido" label="Apellido" placeholder="Ej. Pérez"
+                  value={form.apellido} onChange={update('apellido')} required error={errors.apellido}
+                />
+              </div>
+              <InputField
+                id="fechaNacimiento" label="Fecha de nacimiento" type="date"
+                value={form.fechaNacimiento} onChange={update('fechaNacimiento')}
+                icon={<CalendarIcon />} required error={errors.fechaNacimiento}
+              />
             </>
-          }
-        />
+          )}
 
-        <PrimaryButton type="submit" loading={loading} disabled={!accepted}>
-          Crear Cuenta →
-        </PrimaryButton>
+          {step === 1 && (
+            <>
+              <InputField
+                id="email" label="Correo electrónico" type="email"
+                placeholder="nombre@ejemplo.com"
+                value={form.email} onChange={update('email')}
+                icon={<MailIcon />} required error={errors.email}
+              />
+              <InputField
+                id="password" label="Contraseña"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Mínimo 8 caracteres"
+                value={form.password} onChange={update('password')}
+                icon={<LockIcon />}
+                rightIcon={<EyeIcon open={showPassword} />}
+                onRightIconClick={() => setShowPassword(v => !v)}
+                required error={errors.password}
+              />
+              <div className="form-row">
+                <InputField
+                  id="dui" label="DUI" placeholder="00000000-0"
+                  value={form.dui} onChange={update('dui')} required error={errors.dui}
+                />
+                <InputField
+                  id="telefono" label="Teléfono" type="tel" placeholder="7000-0000"
+                  value={form.telefono} onChange={update('telefono')} required error={errors.telefono}
+                />
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <InputField
+                id="streetAddress" label="Dirección" placeholder="Calle, número, colonia"
+                value={form.streetAddress} onChange={update('streetAddress')}
+                required error={errors.streetAddress}
+              />
+              <div className="form-row">
+                <InputField
+                  id="municipality" label="Municipio" placeholder="Ej. San Salvador"
+                  value={form.municipality} onChange={update('municipality')}
+                  required error={errors.municipality}
+                />
+                <InputField
+                  id="department" label="Departamento" placeholder="Ej. San Salvador"
+                  value={form.department} onChange={update('department')}
+                  required error={errors.department}
+                />
+              </div>
+              <InputField
+                id="country" label="País" placeholder="Ej. El Salvador"
+                value={form.country} onChange={update('country')} required error={errors.country}
+              />
+              <CheckboxField
+                id="terms" checked={accepted}
+                onChange={(e) => setAccepted(e.target.checked)}
+                label={
+                  <>
+                    Al crear una cuenta, acepto los{' '}
+                    <a href="#terms">Términos de Servicio</a> y la{' '}
+                    <a href="#privacy">Política de Privacidad</a>.
+                  </>
+                }
+              />
+              {errors.accepted && <p className="field-error">{errors.accepted}</p>}
+            </>
+          )}
+        </div>
+
+        <div className="step-nav">
+          {step > 0 && (
+            <button type="button" className="btn-back" onClick={goBack}>
+              ← Anterior
+            </button>
+          )}
+          {step < STEPS.length - 1 ? (
+            <button type="button" className="btn-primary" onClick={goNext}>
+              Siguiente →
+            </button>
+          ) : (
+            <PrimaryButton type="submit" loading={loading} disabled={!accepted}>
+              Crear Cuenta →
+            </PrimaryButton>
+          )}
+        </div>
       </form>
 
       <div className="register-footer">

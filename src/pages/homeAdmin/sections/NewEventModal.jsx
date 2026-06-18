@@ -19,15 +19,6 @@ const emptyEvent = () => ({
   imageUrl: '',
 });
 
-const emptyAddress = () => ({
-  streetAddress: '',
-  neighborhood: '',
-  municipality: '',
-  department: '',
-  country: '',
-  referencePoint: '',
-});
-
 const emptyLocality = () => ({ name: '', description: '', price: '' });
 
 const withSeconds = (value) => (value && value.length === 16 ? `${value}:00` : value);
@@ -47,15 +38,6 @@ const fromEvent = (ev) => ({
   imageUrl: ev.imageUrl || '',
 });
 
-const fromAddress = (addr) => addr ? {
-  streetAddress: addr.streetAddress || '',
-  neighborhood: addr.neighborhood || '',
-  municipality: addr.municipality || '',
-  department: addr.department || '',
-  country: addr.country || '',
-  referencePoint: addr.referencePoint || '',
-} : emptyAddress();
-
 const fromLocalities = (locs) =>
   locs?.length > 0
     ? locs.map((l) => ({ name: l.name || '', description: l.description || '', price: String(l.price ?? '') }))
@@ -71,13 +53,6 @@ const TrashIcon = () => (
 const PlusIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 5v14M5 12h14" />
-  </svg>
-);
-
-const MapPinIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-    <circle cx="12" cy="10" r="3"/>
   </svg>
 );
 
@@ -98,8 +73,6 @@ export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEv
   const isEdit = Boolean(initialEvent);
 
   const [form, setForm] = useState(() => initialEvent ? fromEvent(initialEvent) : emptyEvent());
-  const [hasAddress, setHasAddress] = useState(() => Boolean(initialEvent?.address));
-  const [address, setAddress] = useState(() => fromAddress(initialEvent?.address));
   const [localities, setLocalities] = useState(() => fromLocalities(initialEvent?.localities));
   const [success, setSuccess] = useState('');
 
@@ -110,7 +83,6 @@ export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEv
   const error = isEdit ? updateError : createError;
 
   const updateForm = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
-  const updateAddress = (field) => (e) => setAddress(prev => ({ ...prev, [field]: e.target.value }));
 
   const updateLocality = (index, field) => (e) => {
     const value = e.target.value;
@@ -122,8 +94,6 @@ export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEv
 
   const resetAll = () => {
     setForm(emptyEvent());
-    setHasAddress(false);
-    setAddress(emptyAddress());
     setLocalities([emptyLocality()]);
   };
 
@@ -154,7 +124,6 @@ export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEv
       endDate: withSeconds(form.endDate),
       venueName: form.venueName || undefined,
       imageUrl: form.imageUrl || undefined,
-      address: hasAddress ? { ...address } : undefined,
       localities: validLocalities.length > 0 ? validLocalities : undefined,
     };
 
@@ -281,50 +250,10 @@ export default function NewEventForm({ onCancel, onCreated, onUpdated, initialEv
           </div>
         </div>
 
-        {/* ── Card 3: Address ── */}
-        <div className="ef-card">
-          <CardHeader number="3" title="Dirección física" subtitle="Opcional — para eventos presenciales" />
-          <label className="ef-toggle">
-            <input
-              type="checkbox"
-              checked={hasAddress}
-              onChange={(e) => setHasAddress(e.target.checked)}
-            />
-            <MapPinIcon />
-            Incluir dirección física
-          </label>
-          {hasAddress && (
-            <div className="ef-address">
-              <InputField
-                id="ad-street"
-                label="Dirección"
-                placeholder="Calle Principal #123"
-                value={address.streetAddress}
-                onChange={updateAddress('streetAddress')}
-                required
-              />
-              <div className="ef-grid-3">
-                <InputField id="ad-neighborhood" label="Colonia / Barrio" placeholder="Colonia Escalón"
-                  value={address.neighborhood} onChange={updateAddress('neighborhood')} />
-                <InputField id="ad-municipality" label="Municipio" placeholder="San Salvador"
-                  value={address.municipality} onChange={updateAddress('municipality')} required />
-                <InputField id="ad-department" label="Departamento" placeholder="San Salvador"
-                  value={address.department} onChange={updateAddress('department')} required />
-              </div>
-              <div className="ef-grid-2">
-                <InputField id="ad-country" label="País" placeholder="El Salvador"
-                  value={address.country} onChange={updateAddress('country')} required />
-                <InputField id="ad-reference" label="Punto de referencia" placeholder="Frente al parque central"
-                  value={address.referencePoint} onChange={updateAddress('referencePoint')} />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Card 4: Localities ── */}
+        {/* ── Card 3: Localities ── */}
         <div className="ef-card">
           <CardHeader
-            number="4"
+            number="3"
             title="Localidades"
             subtitle="Zonas de acceso con precio"
             action={
