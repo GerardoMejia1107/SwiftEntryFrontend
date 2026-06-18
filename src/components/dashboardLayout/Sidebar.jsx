@@ -2,9 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { BrandLogo } from '../formComponents/FormComponents';
 
 const NAV_ROUTES = {
-  dashboard: '/home-admin',
-  events: '/home-admin/events',
-  users: '/home-admin/users',
+  dashboard:    '/home-admin',
+  events:       '/home-admin/events',
+  users:        '/home-admin/users',
+  reservations: '/home-admin/reservations',
 };
 
 const DashboardIcon = () => (
@@ -76,11 +77,12 @@ const LogoutIcon = () => (
 );
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon },
-  { id: 'events', label: 'Manage Events', icon: EventsIcon },
-  { id: 'users', label: 'All Users', icon: UsersIcon },
-  { id: 'analytics', label: 'Analytics', icon: AnalyticsIcon },
-  { id: 'settings', label: 'Settings', icon: SettingsIcon },
+  { id: 'dashboard',    label: 'Dashboard',     icon: DashboardIcon  },
+  { id: 'events',       label: 'Manage Events',  icon: EventsIcon     },
+  { id: 'users',        label: 'All Users',      icon: UsersIcon      },
+  { id: 'reservations', label: 'Reservations',   icon: TicketIcon     },
+  { id: 'analytics',    label: 'Analytics',      icon: AnalyticsIcon  },
+  { id: 'settings',     label: 'Settings',       icon: SettingsIcon   },
 ];
 
 export default function Sidebar({

@@ -1,0 +1,15 @@
+.rsv-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rsv-badge--pending   { background: #FEF3C7; color: #B45309; }
+.rsv-badge--confirmed { background: #DCFCE7; color: #15803D; }
+.rsv-badge--expired   { background: #F3F4F6; color: #4B5563; }
+.rsv-badge--cancelled { background: #FEE2E2; color: #DC2626; }
+.rsv-badge--refunded  { background: #DBEAFE; color: #1D4ED8; }

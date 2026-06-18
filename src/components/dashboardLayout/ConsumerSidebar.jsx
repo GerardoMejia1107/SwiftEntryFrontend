@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { BrandLogo } from '../formComponents/FormComponents';
 
 const NAV_ROUTES = {
-  home:   '/home-consumer',
-  events: '/home-consumer/events',
+  home:         '/home-consumer',
+  events:       '/home-consumer/events',
+  reservations: '/home-consumer/reservations',
 };
 
 const HomeIcon = () => (
