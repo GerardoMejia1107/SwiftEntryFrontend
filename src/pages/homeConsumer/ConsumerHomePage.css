@@ -1,0 +1,232 @@
+.ch-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.ch-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ch-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 4px;
+}
+
+.ch-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.ch-browse-btn {
+  padding: 10px 20px;
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 13.5px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.ch-browse-btn:hover { opacity: 0.88; }
+
+/* ── Stats pills ── */
+.ch-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ch-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.ch-stat-pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  color: var(--pill-color);
+  flex-shrink: 0;
+}
+
+.ch-stat-pill-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ch-stat-pill-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-heading);
+  line-height: 1;
+}
+
+.ch-stat-pill-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ── Recent section ── */
+.ch-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.ch-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.ch-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.ch-view-all {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  border: none;
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ch-view-all:hover { opacity: 0.8; }
+
+/* ── Empty state ── */
+.ch-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.ch-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: ch-spin 0.7s linear infinite;
+}
+
+@keyframes ch-spin { to { transform: rotate(360deg); } }
+
+.ch-empty-cta {
+  margin-top: 4px;
+  padding: 8px 18px;
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ch-empty-cta:hover { opacity: 0.88; }
+
+/* ── Recent cards grid ── */
+.ch-recent-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+.ch-recent-card {
+  padding: 16px 20px;
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ch-recent-card:last-child { border-right: none; }
+
+.ch-recent-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.ch-recent-id {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.ch-recent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.ch-recent-label { color: var(--text-muted); }
+
+.ch-recent-value {
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.ch-recent-total {
+  font-weight: 800;
+  color: var(--brand-primary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .ch-stats-row { grid-template-columns: 1fr 1fr; }
+  .ch-recent-list { grid-template-columns: 1fr; }
+  .ch-recent-card { border-right: none; border-bottom: 1px solid var(--border-default); }
+  .ch-recent-card:last-child { border-bottom: none; }
+}
+
+@media (max-width: 560px) {
+  .ch-stats-row { grid-template-columns: 1fr; }
+}
