@@ -690,3 +690,155 @@
 .ss-tooltip-status--reserved   { background: #FEF3C7; color: #92400E; }
 .ss-tooltip-status--occupied   { background: #F3F4F6; color: var(--text-muted); }
 .ss-tooltip-status--unassigned { background: var(--bg-page); color: var(--text-muted); }
+
+/* ── Reserve button loading spinner ─────────────────────── */
+.ss-checkout-btn--loading {
+  opacity: 0.75;
+  cursor: wait;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ss-btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ss-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── Reserve error ───────────────────────────────────────── */
+.ss-reserve-error {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #DC2626;
+  background: #FEE2E2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  line-height: 1.45;
+}
+
+/* ── Confirmed / countdown footer ───────────────────────── */
+.ss-confirmed-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 18px;
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.ss-confirmed-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ss-confirmed-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #DCFCE7;
+  color: #15803D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ss-confirmed-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+/* Countdown block */
+.ss-countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-page);
+  border: 1.5px solid var(--border-default);
+  transition: border-color 0.4s, background 0.4s;
+}
+
+.ss-countdown-block--warn {
+  background: #FFFBEB;
+  border-color: #F59E0B;
+}
+
+.ss-countdown-block--danger {
+  background: #FEF2F2;
+  border-color: #EF4444;
+}
+
+.ss-countdown-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.ss-countdown-time {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.ss-countdown-block--warn  .ss-countdown-time  { color: #D97706; }
+.ss-countdown-block--danger .ss-countdown-time { color: #DC2626; }
+
+.ss-countdown-expired {
+  font-size: 12px;
+  font-weight: 700;
+  color: #DC2626;
+  text-align: center;
+}
+
+/* CTA buttons after confirmation */
+.ss-confirmed-cta {
+  width: 100%;
+  padding: 11px;
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ss-confirmed-cta:hover { opacity: 0.88; }
+
+.ss-confirmed-back {
+  width: 100%;
+  padding: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-main);
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ss-confirmed-back:hover {
+  border-color: var(--text-muted);
+  color: var(--text-heading);
+}

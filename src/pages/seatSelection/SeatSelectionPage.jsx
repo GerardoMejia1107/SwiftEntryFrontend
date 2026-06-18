@@ -1,8 +1,11 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useQuery } from '../../hooks/useQuery';
+import { useMutation } from '../../hooks/useMutation';
 import { getSeatMap } from '../../api/seats';
 import { getLocalitiesByEvent } from '../../api/localities';
+import { createReservation } from '../../api/reservations';
+import { useReservation } from '../../context/ReservationContext';
 import './SeatSelectionPage.css';
 
 const ROW_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -78,6 +81,41 @@ const XIcon = () => (
   </svg>
 );
 
+function ReservationCountdown({ expiresAt }) {
+  const [secs, setSecs] = useState(() =>
+    Math.max(0, Math.floor((new Date(expiresAt) - Date.now()) / 1000))
+  );
+
+  useEffect(() => {
+    if (secs <= 0) return;
+    const id = setInterval(() => setSecs(s => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (secs === 0) {
+    return <p className="ss-countdown-expired">Reservation expired</p>;
+  }
+
+  const mins = Math.floor(secs / 60);
+  const seconds = secs % 60;
+  const tone = secs < 60 ? 'danger' : secs < 180 ? 'warn' : 'ok';
+
+  return (
+    <div className={`ss-countdown-block${tone !== 'ok' ? ` ss-countdown-block--${tone}` : ''}`}>
+      <span className="ss-countdown-label">Expires in</span>
+      <span className="ss-countdown-time">
+        {String(mins).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+      </span>
+    </div>
+  );
+}
+
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
 export default function SeatSelectionPage() {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -91,6 +129,9 @@ export default function SeatSelectionPage() {
   const [grid, setGrid] = useState(buildEmptyGrid);
   const [zoom, setZoom] = useState(1.8);
   const [tooltip, setTooltip] = useState(null);
+
+  const { activeReservation, setActiveReservation } = useReservation();
+  const { mutate: reserve, loading: reserving, error: reserveError, reset: resetReserveError } = useMutation(createReservation);
 
   // ── Remote data ────────────────────────────────────────────
   const { data: rawLocalities, loading: localitiesLoading, error: localitiesError } = useQuery(
@@ -213,6 +254,17 @@ export default function SeatSelectionPage() {
   }, [localityById]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMouseLeave = useCallback(() => setTooltip(null), []);
+
+  const handleReserve = async () => {
+    const ids = selectedSeats.map(s => s.localitySeatId);
+    try {
+      const result = await reserve(ids);
+      setActiveReservation(result);
+      refetchSeatMap();
+    } catch {
+      // error surfaced via reserveError from useMutation
+    }
+  };
 
   const zoomIn    = () => setZoom(z => Math.min(ZOOM_MAX, parseFloat((z + ZOOM_STEP).toFixed(1))));
   const zoomOut   = () => setZoom(z => Math.max(ZOOM_MIN, parseFloat((z - ZOOM_STEP).toFixed(1))));
@@ -360,20 +412,50 @@ export default function SeatSelectionPage() {
         </div>
 
         {/* Footer */}
-        <div className="ss-sidebar-footer">
-          <div className="ss-subtotal-row">
-            <span className="ss-subtotal-label">Subtotal</span>
-            <span className="ss-subtotal-amount">${subtotal.toFixed(2)}</span>
+        {activeReservation ? (
+          <div className="ss-confirmed-footer">
+            <div className="ss-confirmed-header">
+              <span className="ss-confirmed-icon"><CheckIcon /></span>
+              <span className="ss-confirmed-title">Reservation confirmed!</span>
+            </div>
+
+            <ReservationCountdown expiresAt={activeReservation.expiresAt} />
+
+            <button
+              className="ss-confirmed-cta"
+              onClick={() => navigate('/home-consumer/reservations')}
+            >
+              View My Reservations
+            </button>
+            <button
+              className="ss-confirmed-back"
+              onClick={() => navigate('/home-consumer/events')}
+            >
+              Back to Events
+            </button>
           </div>
-          <p className="ss-tax-note">Incl. taxes &amp; fees</p>
-          <button
-            className="ss-checkout-btn"
-            disabled={selectedSeats.length === 0}
-            onClick={() => { /* reservation logic TBD */ }}
-          >
-            Reserve {selectedCount > 0 ? `(${selectedCount})` : ''}
-          </button>
-        </div>
+        ) : (
+          <div className="ss-sidebar-footer">
+            <div className="ss-subtotal-row">
+              <span className="ss-subtotal-label">Subtotal</span>
+              <span className="ss-subtotal-amount">${subtotal.toFixed(2)}</span>
+            </div>
+            <p className="ss-tax-note">Incl. taxes &amp; fees</p>
+            {reserveError && (
+              <p className="ss-reserve-error">{reserveError}</p>
+            )}
+            <button
+              className={`ss-checkout-btn${reserving ? ' ss-checkout-btn--loading' : ''}`}
+              disabled={selectedSeats.length === 0 || reserving}
+              onClick={() => { resetReserveError(); handleReserve(); }}
+            >
+              {reserving
+                ? <><span className="ss-btn-spinner" />Reserving…</>
+                : `Reserve${selectedCount > 0 ? ` (${selectedCount})` : ''}`
+              }
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* ── Map area ── */}

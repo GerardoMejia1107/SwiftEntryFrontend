@@ -1,0 +1,72 @@
+.rsv-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 24px;
+  background: #DCFCE7;
+  border-bottom: 1px solid #BBF7D0;
+  flex-shrink: 0;
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.rsv-banner--warn {
+  background: #FFFBEB;
+  border-bottom-color: #FDE68A;
+}
+
+.rsv-banner--danger {
+  background: #FEF2F2;
+  border-bottom-color: #FECACA;
+}
+
+.rsv-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.rsv-banner-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.rsv-banner-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #166534;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rsv-banner--warn  .rsv-banner-text  { color: #92400E; }
+.rsv-banner--danger .rsv-banner-text { color: #991B1B; }
+
+.rsv-banner-time {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
+}
+
+.rsv-banner-dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #166534;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.rsv-banner--warn   .rsv-banner-dismiss { color: #92400E; }
+.rsv-banner--danger .rsv-banner-dismiss { color: #991B1B; }
+
+.rsv-banner-dismiss:hover { opacity: 1; }

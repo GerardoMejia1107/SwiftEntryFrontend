@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ConsumerSidebar from './ConsumerSidebar';
 import TopBar from './TopBar';
+import ReservationBanner from '../reservationBanner/ReservationBanner';
 import './DashboardLayout.css';
 
 export default function ConsumerLayout({ user, activeItem = 'home', onLogout, children }) {
@@ -21,6 +22,7 @@ export default function ConsumerLayout({ user, activeItem = 'home', onLogout, ch
 
       <div className="dashboard-body">
         <TopBar user={user} onToggleSidebar={() => setMobileOpen(v => !v)} />
+        <ReservationBanner />
         <main className="dashboard-content">{children}</main>
       </div>
     </div>
