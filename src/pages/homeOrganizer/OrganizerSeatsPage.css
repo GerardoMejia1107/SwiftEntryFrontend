@@ -498,7 +498,19 @@
   /* background set via inline style */
 }
 
-.oss-seat:hover {
+/* Reserved: locality color still visible but dimmed — seat is held by a user */
+.oss-seat--reserved {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Occupied: very dim — seat is confirmed/sold */
+.oss-seat--occupied {
+  opacity: 0.18;
+  cursor: not-allowed;
+}
+
+.oss-seat:not(:disabled):hover {
   filter: brightness(0.82);
   z-index: 1;
 }

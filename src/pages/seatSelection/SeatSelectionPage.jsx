@@ -98,7 +98,7 @@ export default function SeatSelectionPage() {
     [eventId]
   );
 
-  const { data: seatMapData, loading: seatMapLoading, error: seatMapError } = useQuery(
+  const { data: seatMapData, loading: seatMapLoading, error: seatMapError, refetch: refetchSeatMap } = useQuery(
     () => eventId ? getSeatMap(Number(eventId)) : Promise.resolve([]),
     [eventId]
   );
@@ -113,29 +113,39 @@ export default function SeatSelectionPage() {
     [localities]
   );
 
-  // Sync grid from backend seat map
+  // Sync grid from backend seat map — preserves selected state across silent polls.
+  // If a selected seat becomes reserved by someone else, it is automatically deselected.
   useEffect(() => {
     if (!seatMapData) return;
     const lookup = {};
     seatMapData.forEach(s => { lookup[`${s.row}${s.col}`] = s; });
 
-    setGrid(
+    setGrid(prev =>
       Array.from({ length: ROWS }, (_, r) =>
         Array.from({ length: COLS }, (_, c) => {
           const row = ROW_LABELS[r];
           const col = String(c + 1);
           const data = lookup[`${row}${col}`] ?? {};
+          const newStatus = data.status ?? null;
+          const wasSelected = prev?.[r]?.[c]?.selected ?? false;
           return {
             id: `${r}-${c}`,
             localityId: data.localityId ?? null,
             localitySeatId: data.localitySeatId ?? null,
-            status: data.status ?? null,
-            selected: false,
+            status: newStatus,
+            selected: wasSelected && newStatus === 'AVAILABLE',
           };
         })
       )
     );
   }, [seatMapData]);
+
+  // Poll the seat map every 15 s so reservations made by others appear in real-time.
+  useEffect(() => {
+    if (!eventId) return;
+    const id = setInterval(refetchSeatMap, 15_000);
+    return () => clearInterval(id);
+  }, [eventId, refetchSeatMap]);
 
   // ── Derived ────────────────────────────────────────────────
   const seatLabel = (r, c) => `${ROW_LABELS[r]}${c + 1}`;
@@ -162,7 +172,8 @@ export default function SeatSelectionPage() {
   const selectedCount = selectedSeats.length;
   const subtotal = selectedSeats.reduce((sum, s) => sum + s.price, 0);
 
-  const isLoading = localitiesLoading || seatMapLoading;
+  // Only show the loading spinner on the first fetch; subsequent polls are silent.
+  const isInitialLoading = localitiesLoading || (seatMapLoading && !seatMapData);
   const loadError = localitiesError ?? seatMapError ?? null;
 
   // ── Interactions ───────────────────────────────────────────
@@ -274,7 +285,7 @@ export default function SeatSelectionPage() {
           </div>
 
           {/* Localities legend */}
-          {!isLoading && !loadError && localities.length > 0 && (
+          {!isInitialLoading && !loadError && localities.length > 0 && (
             <div className="ss-localities-legend">
               <p className="ss-section-title">Localities</p>
               <div className="ss-legend-list">
@@ -379,18 +390,18 @@ export default function SeatSelectionPage() {
           <button className="ss-zoom-btn" onClick={zoomReset} aria-label="Reset zoom"><ResetIcon /></button>
         </div>
 
-        {isLoading && (
+        {isInitialLoading && (
           <div className="ss-map-state">
             <span className="ss-map-spinner" />
             <span>Loading seat map…</span>
           </div>
         )}
 
-        {!isLoading && loadError && (
+        {!isInitialLoading && loadError && (
           <div className="ss-map-state ss-map-state--error">Failed to load seat map.</div>
         )}
 
-        {!isLoading && !loadError && (
+        {!isInitialLoading && !loadError && (
           <div className="ss-grid-viewport">
             <div className="ss-grid-scaler" style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
 

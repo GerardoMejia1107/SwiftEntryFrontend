@@ -200,10 +200,19 @@ export default function OrganizerSeatsPage() {
   const hasChanges =
     Object.keys(pendingAssignments).length > 0 || pendingUnassignments.length > 0;
 
+  // Poll every 15 s to show reservations in real-time.
+  // Paused while the organizer has unsaved changes to avoid overwriting local edits.
+  useEffect(() => {
+    if (!event?.id || hasChanges) return;
+    const id = setInterval(refetchSeatMap, 15_000);
+    return () => clearInterval(id);
+  }, [event?.id, hasChanges, refetchSeatMap]);
+
   // ── Interactions ───────────────────────────────────────────
   const handleSeatClick = useCallback((r, c) => {
     setGrid(prev => {
       const seat = prev[r][c];
+      if (seat.status === 'RESERVED' || seat.status === 'OCCUPIED') return prev;
       const newLocalityId = eraseMode
         ? null
         : seat.localityId === activeLocalityId ? null : activeLocalityId;
@@ -258,7 +267,8 @@ export default function OrganizerSeatsPage() {
   const leftSeats  = grid.flatMap((row, r) => row.slice(0, COLS_BLOCK).map((seat, c) => ({ seat, r, c })));
   const rightSeats = grid.flatMap((row, r) => row.slice(COLS_BLOCK).map((seat, c) => ({ seat, r, c: c + COLS_BLOCK })));
 
-  const isLoading = localitiesLoading || seatMapLoading;
+  // Only show the loading spinner on the first fetch; subsequent polls are silent.
+  const isInitialLoading = localitiesLoading || (seatMapLoading && !seatMapData);
   const loadError = localitiesError ?? seatMapError ?? null;
 
   if (!event) return null;
@@ -315,10 +325,10 @@ export default function OrganizerSeatsPage() {
             <p className="oss-section-title">Localities</p>
             <p className="oss-section-hint">Select a locality, then click seats on the map to assign them.</p>
 
-            {isLoading && <span className="oss-localities-loading">Loading…</span>}
+            {isInitialLoading && <span className="oss-localities-loading">Loading…</span>}
             {loadError && <span className="oss-localities-error">{loadError}</span>}
 
-            {!isLoading && !loadError && (
+            {!isInitialLoading && !loadError && (
               <div className="oss-locality-list">
                 {localities.map(loc => (
                   <button
@@ -396,18 +406,18 @@ export default function OrganizerSeatsPage() {
           <button className="oss-zoom-btn" onClick={zoomReset} aria-label="Reset zoom"><ResetIcon /></button>
         </div>
 
-        {isLoading && (
+        {isInitialLoading && (
           <div className="oss-map-loading">
             <span className="oss-map-spinner" />
             <span>Loading seat map…</span>
           </div>
         )}
 
-        {loadError && (
+        {!isInitialLoading && loadError && (
           <div className="oss-map-error">Failed to load seat map: {loadError}</div>
         )}
 
-        {!isLoading && !loadError && (
+        {!isInitialLoading && !loadError && (
           <div className="oss-grid-viewport">
             <div className="oss-grid-scaler" style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
 
@@ -438,14 +448,17 @@ export default function OrganizerSeatsPage() {
                 <div className="oss-block">
                   {leftSeats.map(({ seat, r, c }) => {
                     const loc = seat.localityId != null ? localityById[seat.localityId] : null;
+                    const locked = seat.status === 'RESERVED' || seat.status === 'OCCUPIED';
+                    const statusCls = locked ? ` oss-seat--${seat.status.toLowerCase()}` : '';
                     return (
                       <button
                         key={seat.id}
-                        className={`oss-seat ${loc ? 'oss-seat--assigned' : 'oss-seat--unassigned'}`}
+                        className={`oss-seat ${loc ? 'oss-seat--assigned' : 'oss-seat--unassigned'}${statusCls}`}
                         style={loc ? { backgroundColor: loc.color } : undefined}
                         onClick={() => handleSeatClick(r, c)}
                         onMouseEnter={(e) => handleMouseEnter(e, seat, r, c)}
                         onMouseLeave={handleMouseLeave}
+                        disabled={locked}
                         aria-label={`Seat ${seatLabel(r, c)}`}
                       />
                     );
@@ -459,14 +472,17 @@ export default function OrganizerSeatsPage() {
                 <div className="oss-block">
                   {rightSeats.map(({ seat, r, c }) => {
                     const loc = seat.localityId != null ? localityById[seat.localityId] : null;
+                    const locked = seat.status === 'RESERVED' || seat.status === 'OCCUPIED';
+                    const statusCls = locked ? ` oss-seat--${seat.status.toLowerCase()}` : '';
                     return (
                       <button
                         key={seat.id}
-                        className={`oss-seat ${loc ? 'oss-seat--assigned' : 'oss-seat--unassigned'}`}
+                        className={`oss-seat ${loc ? 'oss-seat--assigned' : 'oss-seat--unassigned'}${statusCls}`}
                         style={loc ? { backgroundColor: loc.color } : undefined}
                         onClick={() => handleSeatClick(r, c)}
                         onMouseEnter={(e) => handleMouseEnter(e, seat, r, c)}
                         onMouseLeave={handleMouseLeave}
+                        disabled={locked}
                         aria-label={`Seat ${seatLabel(r, c)}`}
                       />
                     );
