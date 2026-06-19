@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ConsumerLayout from '../../components/dashboardLayout/ConsumerLayout';
 import { useMyReservations } from '../../hooks/useReservations';
+import PaymentModal from './sections/PaymentModal';
 import './ConsumerReservationsPage.css';
 
 const STATUS_META = {
@@ -25,9 +27,11 @@ const formatAmount = (val) => {
   return `$${Number(val).toFixed(2)}`;
 };
 
-function ReservationCard({ reservation: r }) {
+function ReservationCard({ reservation: r, onPay }) {
   const meta = STATUS_META[r.status] ?? { label: r.status, cls: '' };
   const seatCount = Array.isArray(r.reservationSeats) ? r.reservationSeats.length : 0;
+  const isExpired = r.expiresAt && new Date(r.expiresAt) < new Date();
+  const canPay = r.status === 'PENDING' && !isExpired;
 
   return (
     <div className="rsv-card">
@@ -73,6 +77,14 @@ function ReservationCard({ reservation: r }) {
         )}
       </div>
 
+      {canPay && (
+        <div className="rsv-card-footer">
+          <button type="button" className="rsv-pay-btn" onClick={() => onPay(r)}>
+            Pay now
+          </button>
+        </div>
+      )}
+
       {r.purchasedAt && (
         <div className="rsv-card-footer">
           Purchased on {formatDate(r.purchasedAt)}
@@ -85,11 +97,17 @@ function ReservationCard({ reservation: r }) {
 export default function ConsumerReservationsPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
-  const { reservations, loading, error } = useMyReservations();
+  const { reservations, loading, error, refetch } = useMyReservations();
+  const [payingReservation, setPayingReservation] = useState(null);
 
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
+  };
+
+  const handlePaymentSuccess = () => {
+    setPayingReservation(null);
+    refetch();
   };
 
   return (
@@ -126,11 +144,19 @@ export default function ConsumerReservationsPage() {
         {!loading && !error && reservations.length > 0 && (
           <div className="rsv-grid">
             {reservations.map((r) => (
-              <ReservationCard key={r.id} reservation={r} />
+              <ReservationCard key={r.id} reservation={r} onPay={setPayingReservation} />
             ))}
           </div>
         )}
       </div>
+
+      {payingReservation && (
+        <PaymentModal
+          reservation={payingReservation}
+          onClose={() => setPayingReservation(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </ConsumerLayout>
   );
 }

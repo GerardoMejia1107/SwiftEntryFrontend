@@ -90,6 +90,23 @@
   color: var(--text-muted);
 }
 
+.rsv-pay-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.rsv-pay-btn:hover {
+  opacity: 0.9;
+}
+
 .rsv-state {
   display: flex;
   flex-direction: column;
