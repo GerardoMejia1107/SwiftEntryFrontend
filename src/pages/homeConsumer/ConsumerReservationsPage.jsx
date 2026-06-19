@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useReservation } from '../../context/ReservationContext';
 import ConsumerLayout from '../../components/dashboardLayout/ConsumerLayout';
 import { useMyReservations } from '../../hooks/useReservations';
 import PaymentModal from './sections/PaymentModal';
@@ -98,6 +99,7 @@ export default function ConsumerReservationsPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const { reservations, loading, error, refetch } = useMyReservations();
+  const { clearActiveReservation } = useReservation();
   const [payingReservation, setPayingReservation] = useState(null);
 
   const handleLogout = () => {
@@ -105,7 +107,10 @@ export default function ConsumerReservationsPage() {
     navigate('/login', { replace: true });
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (payment) => {
+    if (payment?.reservationStatus === 'CONFIRMED') {
+      clearActiveReservation();
+    }
     setPayingReservation(null);
     refetch();
   };
