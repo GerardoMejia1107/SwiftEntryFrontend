@@ -1,25 +1,28 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useReservation } from '../../context/ReservationContext';
 import ConsumerLayout from '../../components/dashboardLayout/ConsumerLayout';
 import { useMyReservations } from '../../hooks/useReservations';
+import ReservationDetailModal from '../homeAdmin/sections/ReservationDetailModal';
 import PaymentModal from './sections/PaymentModal';
+import '../homeAdmin/EventsPage.css';
+import '../homeAdmin/ReservationsPage.css';
+import '../homeAdmin/UsersPage.css';
 import './ConsumerReservationsPage.css';
 
-const STATUS_META = {
-  PENDING:   { label: 'Pending',   cls: 'rsv-status--pending'   },
-  CONFIRMED: { label: 'Confirmed', cls: 'rsv-status--confirmed' },
-  EXPIRED:   { label: 'Expired',   cls: 'rsv-status--expired'   },
-  CANCELLED: { label: 'Cancelled', cls: 'rsv-status--cancelled' },
-  REFUNDED:  { label: 'Refunded',  cls: 'rsv-status--refunded'  },
+const STATUS_BADGE = {
+  PENDING:   { label: 'Pending',   cls: 'rsv-badge--pending'   },
+  CONFIRMED: { label: 'Confirmed', cls: 'rsv-badge--confirmed' },
+  EXPIRED:   { label: 'Expired',   cls: 'rsv-badge--expired'   },
+  CANCELLED: { label: 'Cancelled', cls: 'rsv-badge--cancelled' },
+  REFUNDED:  { label: 'Refunded',  cls: 'rsv-badge--refunded'  },
 };
 
 const formatDate = (iso) => {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('en-US', {
+  return new Date(iso).toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
   });
 };
 
@@ -28,79 +31,22 @@ const formatAmount = (val) => {
   return `$${Number(val).toFixed(2)}`;
 };
 
-function ReservationCard({ reservation: r, onPay }) {
-  const meta = STATUS_META[r.status] ?? { label: r.status, cls: '' };
-  const seatCount = Array.isArray(r.reservationSeats) ? r.reservationSeats.length : 0;
-  const isExpired = r.expiresAt && new Date(r.expiresAt) < new Date();
-  const canPay = r.status === 'PENDING' && !isExpired;
-
-  return (
-    <div className="rsv-card">
-      <div className="rsv-card-header">
-        <span className="rsv-card-id">Reservation #{r.id}</span>
-        <span className={`rsv-status-badge ${meta.cls}`}>{meta.label}</span>
-      </div>
-
-      <div className="rsv-card-body">
-        <div className="rsv-row">
-          <span className="rsv-row-label">Seats</span>
-          <span className="rsv-row-value">{seatCount}</span>
-        </div>
-        <div className="rsv-row">
-          <span className="rsv-row-label">Subtotal</span>
-          <span className="rsv-row-value">{formatAmount(r.subtotal)}</span>
-        </div>
-        {Number(r.discountAmount) > 0 && (
-          <div className="rsv-row">
-            <span className="rsv-row-label">Discount</span>
-            <span className="rsv-row-value" style={{ color: '#15803D' }}>−{formatAmount(r.discountAmount)}</span>
-          </div>
-        )}
-        {Number(r.taxAmount) > 0 && (
-          <div className="rsv-row">
-            <span className="rsv-row-label">Tax</span>
-            <span className="rsv-row-value">{formatAmount(r.taxAmount)}</span>
-          </div>
-        )}
-        <div className="rsv-row" style={{ marginTop: 4 }}>
-          <span className="rsv-row-label">Total</span>
-          <span className="rsv-total">{formatAmount(r.totalAmount)}</span>
-        </div>
-        <div className="rsv-row">
-          <span className="rsv-row-label">Reserved</span>
-          <span className="rsv-row-value" style={{ fontWeight: 500, fontSize: 12 }}>{formatDate(r.reservedAt)}</span>
-        </div>
-        {r.expiresAt && r.status === 'PENDING' && (
-          <div className="rsv-row">
-            <span className="rsv-row-label">Expires</span>
-            <span className="rsv-row-value" style={{ fontWeight: 500, fontSize: 12, color: '#B45309' }}>{formatDate(r.expiresAt)}</span>
-          </div>
-        )}
-      </div>
-
-      {canPay && (
-        <div className="rsv-card-footer">
-          <button type="button" className="rsv-pay-btn" onClick={() => onPay(r)}>
-            Pay now
-          </button>
-        </div>
-      )}
-
-      {r.purchasedAt && (
-        <div className="rsv-card-footer">
-          Purchased on {formatDate(r.purchasedAt)}
-        </div>
-      )}
-    </div>
-  );
-}
+const SearchIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
 
 export default function ConsumerReservationsPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const { reservations, loading, error, refetch } = useMyReservations();
   const { clearActiveReservation } = useReservation();
+
+  const [selected, setSelected]         = useState(null);
   const [payingReservation, setPayingReservation] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch]             = useState('');
 
   const handleLogout = () => {
     logout();
@@ -115,45 +61,155 @@ export default function ConsumerReservationsPage() {
     refetch();
   };
 
+  const handlePay = (e, r) => {
+    e.stopPropagation();
+    setPayingReservation(r);
+  };
+
+  const visible = useMemo(() => {
+    let result = [...reservations];
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((r) => String(r.id).includes(q));
+    }
+
+    if (statusFilter !== 'all') {
+      result = result.filter((r) => r.status === statusFilter);
+    }
+
+    result.sort((a, b) => b.id - a.id);
+    return result;
+  }, [reservations, search, statusFilter]);
+
   return (
     <ConsumerLayout user={auth?.user} activeItem="reservations" onLogout={handleLogout}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1280, margin: '0 auto' }}>
-        <header style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>
-            My Reservations
-          </h1>
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
-            All your current and past reservations.
-          </p>
+      <div className="crsv-page">
+        <header className="crsv-header">
+          <h1 className="crsv-title">My Reservations</h1>
+          <p className="crsv-subtitle">All your current and past reservations.</p>
         </header>
 
-        {loading && (
-          <div className="rsv-state">
-            <span className="rsv-spinner" />
-            <p>Loading your reservations…</p>
+        <div className="ev-card">
+          <div className="usr-toolbar">
+            <div className="usr-search-wrap">
+              <span className="usr-search-icon"><SearchIcon /></span>
+              <input
+                type="text"
+                className="usr-search"
+                placeholder="Search by reservation ID…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="usr-toolbar-right">
+              <select
+                className="usr-select"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All statuses</option>
+                {Object.keys(STATUS_BADGE).map((s) => (
+                  <option key={s} value={s}>{STATUS_BADGE[s].label}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        )}
 
-        {!loading && error && (
-          <div className="rsv-state rsv-state--error">
-            <p>Could not load reservations. Please try again later.</p>
-          </div>
-        )}
+          {loading && (
+            <div className="ev-state">
+              <span className="ev-spinner" />
+              <p className="ev-state-text">Loading your reservations…</p>
+            </div>
+          )}
 
-        {!loading && !error && reservations.length === 0 && (
-          <div className="rsv-state">
-            <p>You have no reservations yet. Browse events to get started!</p>
-          </div>
-        )}
+          {!loading && error && (
+            <div className="ev-state ev-state--error">
+              <p className="ev-state-text">Could not load reservations. Please try again later.</p>
+            </div>
+          )}
+
+          {!loading && !error && reservations.length === 0 && (
+            <div className="ev-state">
+              <p className="ev-state-text">You have no reservations yet. Browse events to get started!</p>
+            </div>
+          )}
+
+          {!loading && !error && reservations.length > 0 && (
+            <>
+              {visible.length === 0 ? (
+                <div className="ev-state">
+                  <p className="ev-state-text">No reservations match your filter.</p>
+                </div>
+              ) : (
+                <div className="ev-table-wrap">
+                  <table className="ev-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Status</th>
+                        <th>Seats</th>
+                        <th>Total</th>
+                        <th>Reserved</th>
+                        <th>Expires / Purchased</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visible.map((r) => {
+                        const badge = STATUS_BADGE[r.status] ?? { label: r.status, cls: '' };
+                        const isExpired = r.expiresAt && new Date(r.expiresAt) < new Date();
+                        const canPay = r.status === 'PENDING' && !isExpired;
+                        const expiresOrPurchased = r.status === 'CONFIRMED'
+                          ? formatDate(r.purchasedAt)
+                          : formatDate(r.expiresAt);
+
+                        return (
+                          <tr key={r.id} className="ev-row" onClick={() => setSelected(r)}>
+                            <td className="ev-col-id">#{r.id}</td>
+                            <td>
+                              <span className={`rsv-badge ${badge.cls}`}>{badge.label}</span>
+                            </td>
+                            <td>{Array.isArray(r.reservationSeats) ? r.reservationSeats.length : 0}</td>
+                            <td style={{ fontWeight: 700 }}>{formatAmount(r.totalAmount)}</td>
+                            <td className="ev-col-date">{formatDate(r.reservedAt)}</td>
+                            <td className="ev-col-date">{expiresOrPurchased}</td>
+                            <td className="ev-col-actions" onClick={(e) => e.stopPropagation()}>
+                              {canPay && (
+                                <button
+                                  type="button"
+                                  className="crsv-pay-btn"
+                                  onClick={(e) => handlePay(e, r)}
+                                >
+                                  Pay now
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         {!loading && !error && reservations.length > 0 && (
-          <div className="rsv-grid">
-            {reservations.map((r) => (
-              <ReservationCard key={r.id} reservation={r} onPay={setPayingReservation} />
-            ))}
-          </div>
+          <p className="usr-count">
+            Showing {visible.length} of {reservations.length} reservations
+          </p>
         )}
       </div>
+
+      {selected && (
+        <ReservationDetailModal
+          reservation={selected}
+          variant="consumer"
+          onClose={() => setSelected(null)}
+        />
+      )}
 
       {payingReservation && (
         <PaymentModal

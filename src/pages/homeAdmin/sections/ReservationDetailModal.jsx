@@ -37,6 +37,7 @@ function MetaItem({ label, value, accent }) {
 /**
  * variant='admin'     — shows user ID, full financial breakdown, all dates, seat prices
  * variant='organizer' — shows name/email only, total only, reserved/expires dates, no seat prices
+ * variant='consumer'  — shows full financial breakdown, all dates, seat prices (no customer info)
  */
 export default function ReservationDetailModal({ reservation: r, variant = 'admin', onClose }) {
   useEffect(() => {
@@ -48,10 +49,11 @@ export default function ReservationDetailModal({ reservation: r, variant = 'admi
   const status = STATUS_META[r.status] ?? { label: r.status, cls: '' };
   const seats  = Array.isArray(r.reservationSeats) ? r.reservationSeats : [];
   const isAdmin = variant === 'admin';
+  const isConsumer = variant === 'consumer';
 
   return (
     <div className="rsd-overlay" onClick={onClose}>
-      <div className={`rsd-modal${isAdmin ? ' rsd-modal--wide' : ''}`} onClick={(e) => e.stopPropagation()}>
+      <div className={`rsd-modal${isAdmin || isConsumer ? ' rsd-modal--wide' : ''}`} onClick={(e) => e.stopPropagation()}>
 
         {/* ── Header ── */}
         <div className="rsd-header">
@@ -65,7 +67,57 @@ export default function ReservationDetailModal({ reservation: r, variant = 'admi
         </div>
 
         {/* ── Body ── */}
-        {isAdmin ? (
+        {isConsumer ? (
+          <div className="rsd-body rsd-body--wide">
+
+            {/* Left column: Financials */}
+            <div className="rsd-col-left">
+              <div>
+                <p className="rsd-section-title">Financials</p>
+                <div className="rsd-meta-grid">
+                  <MetaItem label="Subtotal"  value={money(r.subtotal)} />
+                  <MetaItem label="Tax"       value={money(r.taxAmount)} />
+                  <MetaItem label="Discount"  value={money(r.discountAmount)} />
+                  <MetaItem label="Total"     value={money(r.totalAmount)} accent />
+                </div>
+              </div>
+            </div>
+
+            {/* Right column: Dates + Seats */}
+            <div className="rsd-col-right">
+              <div>
+                <p className="rsd-section-title">Dates</p>
+                <div className="rsd-meta-grid">
+                  <MetaItem label="Reserved at"  value={fmt(r.reservedAt)} />
+                  <MetaItem label="Expires at"   value={fmt(r.expiresAt)} />
+                  <MetaItem label="Purchased at" value={fmt(r.purchasedAt)} />
+                </div>
+              </div>
+
+              {seats.length > 0 && (
+                <div>
+                  <p className="rsd-section-title">Seats ({seats.length})</p>
+                  <div className="rsd-seats-list">
+                    {seats.map((s) => (
+                      <div key={s.id} className="rsd-seat-row">
+                        <div className="rsd-seat-label">
+                          <span className="rsd-seat-tag">{s.rowLabel}{s.seatNumber}</span>
+                          <span className="rsd-seat-locality">{s.localityName || '—'}</span>
+                        </div>
+                        <span className="rsd-seat-price">{money(s.priceAtReservation)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="rsd-footer rsd-full-row">
+              <span>Reservation #{r.id}</span>
+              {r.reservedAt && <span>· Reserved {fmt(r.reservedAt)}</span>}
+            </div>
+          </div>
+        ) : isAdmin ? (
           <div className="rsd-body rsd-body--wide">
 
             {/* Left column: Customer + Financials */}

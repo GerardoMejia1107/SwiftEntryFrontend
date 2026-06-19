@@ -16,17 +16,12 @@ const formatAmount = (val) => {
 
 export default function PaymentModal({ reservation, onClose, onSuccess }) {
   const [paymentMethod, setPaymentMethod] = useState('CREDIT_CARD');
-  const [transactionReference, setTransactionReference] = useState('');
   const { processPayment, loading, error } = useProcessPayment();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payment = await processPayment({
-        reservationId: reservation.id,
-        paymentMethod,
-        transactionReference: transactionReference.trim() || undefined,
-      });
+      const payment = await processPayment({ reservationId: reservation.id, paymentMethod });
       onSuccess?.(payment);
     } catch {
       // error state is handled by the hook and rendered below
@@ -59,19 +54,6 @@ export default function PaymentModal({ reservation, onClose, onSuccess }) {
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
-          </label>
-
-          <label className="pay-field">
-            <span className="pay-label">Transaction reference <span className="pay-optional">(optional)</span></span>
-            <input
-              className="pay-input"
-              type="text"
-              maxLength={150}
-              value={transactionReference}
-              placeholder="e.g. card authorization code"
-              onChange={(e) => setTransactionReference(e.target.value)}
-              disabled={loading}
-            />
           </label>
 
           {error && <p className="pay-error">{error}</p>}

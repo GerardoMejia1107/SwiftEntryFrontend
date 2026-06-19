@@ -5,6 +5,7 @@ const NAV_ROUTES = {
   home:         '/home-consumer',
   events:       '/home-consumer/events',
   reservations: '/home-consumer/reservations',
+  payments:     '/home-consumer/payments',
 };
 
 const HomeIcon = () => (

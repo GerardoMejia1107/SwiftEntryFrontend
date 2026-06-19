@@ -16,6 +16,7 @@ import OrganizerReservationsPage from './pages/homeOrganizer/OrganizerReservatio
 import ConsumerHomePage from './pages/homeConsumer/ConsumerHomePage';
 import ConsumerEventsPage from './pages/homeConsumer/ConsumerEventsPage';
 import ConsumerReservationsPage from './pages/homeConsumer/ConsumerReservationsPage';
+import ConsumerPaymentsPage from './pages/homeConsumer/ConsumerPaymentsPage';
 import SeatSelectionPage from './pages/seatSelection/SeatSelectionPage';
 import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage';
 import ProtectedRoute from './router/ProtectedRoute';
@@ -101,6 +102,11 @@ export default function App() {
           <Route path="/home-consumer/reservations" element={
             <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
               <ConsumerReservationsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/home-consumer/payments" element={
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+              <ConsumerPaymentsPage />
             </ProtectedRoute>
           } />
 
