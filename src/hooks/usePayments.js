@@ -17,3 +17,8 @@ export function useMyTickets() {
   const { data, loading, error, refetch } = useQuery(ticketsApi.getMyTickets);
   return { tickets: data ?? [], loading, error, refetch };
 }
+
+export function useTransferTicket() {
+  const { mutate, loading, error, reset } = useMutation(ticketsApi.transferTicket);
+  return { transferTicket: mutate, loading, error, reset };
+}

@@ -27,7 +27,7 @@ function Field({ label, value, mono }) {
   );
 }
 
-export default function TicketDetailModal({ ticket: t, onClose }) {
+export default function TicketDetailModal({ ticket: t, onClose, onTransfer }) {
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
@@ -74,6 +74,14 @@ export default function TicketDetailModal({ ticket: t, onClose }) {
               </>
             )}
           </div>
+
+          {onTransfer && t.status === 'ISSUED' && (
+            <div className="dtl-actions">
+              <button type="button" className="dtl-btn-transfer" onClick={onTransfer}>
+                Transfer ticket
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import ConsumerLayout from '../../components/dashboardLayout/ConsumerLayout';
 import { useMyPayments, useMyTickets } from '../../hooks/usePayments';
 import PaymentDetailModal from './sections/PaymentDetailModal';
 import TicketDetailModal from './sections/TicketDetailModal';
+import TicketTransferModal from './sections/TicketTransferModal';
 import '../homeAdmin/EventsPage.css';
 import './ConsumerPaymentsPage.css';
 
@@ -95,9 +96,7 @@ function PaymentsTab({ onSelect }) {
   );
 }
 
-function TicketsTab({ onSelect }) {
-  const { tickets, loading, error } = useMyTickets();
-
+function TicketsTab({ tickets, loading, error, onSelect }) {
   if (loading) return (
     <div className="ev-state">
       <span className="ev-spinner" />
@@ -159,9 +158,22 @@ function TicketsTab({ onSelect }) {
 export default function ConsumerPaymentsPage() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab]       = useState('payments');
-  const [selectedPayment, setSelectedPayment] = useState(null);
-  const [selectedTicket, setSelectedTicket]   = useState(null);
+  const [activeTab, setActiveTab]               = useState('payments');
+  const [selectedPayment, setSelectedPayment]   = useState(null);
+  const [selectedTicket, setSelectedTicket]     = useState(null);
+  const [transferringTicket, setTransferringTicket] = useState(null);
+
+  const { tickets, loading: ticketsLoading, error: ticketsError, refetch: refetchTickets } = useMyTickets();
+
+  const handleTransferClick = (ticket) => {
+    setSelectedTicket(null);
+    setTransferringTicket(ticket);
+  };
+
+  const handleTransferSuccess = () => {
+    setTransferringTicket(null);
+    refetchTickets();
+  };
 
   const handleLogout = () => {
     logout();
@@ -196,7 +208,14 @@ export default function ConsumerPaymentsPage() {
 
           {activeTab === 'payments'
             ? <PaymentsTab onSelect={setSelectedPayment} />
-            : <TicketsTab  onSelect={setSelectedTicket}  />}
+            : (
+              <TicketsTab
+                tickets={tickets}
+                loading={ticketsLoading}
+                error={ticketsError}
+                onSelect={setSelectedTicket}
+              />
+            )}
         </div>
       </div>
 
@@ -211,6 +230,15 @@ export default function ConsumerPaymentsPage() {
         <TicketDetailModal
           ticket={selectedTicket}
           onClose={() => setSelectedTicket(null)}
+          onTransfer={() => handleTransferClick(selectedTicket)}
+        />
+      )}
+
+      {transferringTicket && (
+        <TicketTransferModal
+          ticket={transferringTicket}
+          onClose={() => setTransferringTicket(null)}
+          onSuccess={handleTransferSuccess}
         />
       )}
     </ConsumerLayout>
