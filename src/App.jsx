@@ -85,27 +85,27 @@ export default function App() {
             </ProtectedRoute>
           } />
           <Route path="/home-consumer" element={
-            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT', 'ROLE_USER']}>
               <ConsumerHomePage />
             </ProtectedRoute>
           } />
           <Route path="/home-consumer/events" element={
-            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT', 'ROLE_USER']}>
               <ConsumerEventsPage />
             </ProtectedRoute>
           } />
           <Route path="/home-consumer/events/:eventId/seats" element={
-            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT', 'ROLE_USER']}>
               <SeatSelectionPage />
             </ProtectedRoute>
           } />
           <Route path="/home-consumer/reservations" element={
-            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT', 'ROLE_USER']}>
               <ConsumerReservationsPage />
             </ProtectedRoute>
           } />
           <Route path="/home-consumer/payments" element={
-            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT']}>
+            <ProtectedRoute allowedRoles={['ROLE_CONSUMER', 'ROLE_CLIENT', 'ROLE_USER']}>
               <ConsumerPaymentsPage />
             </ProtectedRoute>
           } />

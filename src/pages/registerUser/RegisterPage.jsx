@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthLayout from '../../components/authLayout/AuthLayout';
 import {
@@ -170,21 +170,21 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <div className="step-indicator">
-        {STEPS.map((s, i) => (
-          <>
-            <div key={i} className="step-item">
-              <div className={`step-dot ${i < step ? 'step-dot--done' : ''} ${i === step ? 'step-dot--active' : ''}`}>
-                {i < step ? <CheckIcon /> : i + 1}
-              </div>
-              <span className={`step-label ${i === step ? 'step-label--active' : ''}`}>{s.label}</span>
-            </div>
-            {i < STEPS.length - 1 && (
-              <div key={`connector-${i}`} className={`step-connector ${i < step ? 'step-connector--done' : ''}`} />
-            )}
-          </>
-        ))}
+<div className="step-indicator">
+  {STEPS.map((s, i) => (
+    <Fragment key={i}>
+      <div className="step-item">
+        <div className={`step-dot ${i < step ? 'step-dot--done' : ''} ${i === step ? 'step-dot--active' : ''}`}>
+          {i < step ? <CheckIcon /> : i + 1}
+        </div>
+        <span className={`step-label ${i === step ? 'step-label--active' : ''}`}>{s.label}</span>
       </div>
+      {i < STEPS.length - 1 && (
+        <div className={`step-connector ${i < step ? 'step-connector--done' : ''}`} />
+      )}
+    </Fragment>
+  ))}
+</div>
 
       <form className="register-form" onSubmit={handleSubmit} noValidate>
         <div className="step-panel" key={step}>

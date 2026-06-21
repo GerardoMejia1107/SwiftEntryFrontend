@@ -3,6 +3,7 @@ export const roleRoutes = {
   ROLE_ORGANIZER:     '/home-organizer',
   ROLE_CONSUMER:      '/home-consumer',
   ROLE_CLIENT:        '/home-consumer',
+  ROLE_USER:          '/home-consumer',
 };
 
 export const DEFAULT_ROUTE = '/home-consumer';
