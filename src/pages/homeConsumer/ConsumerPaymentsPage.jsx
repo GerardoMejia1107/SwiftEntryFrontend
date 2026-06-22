@@ -66,13 +66,10 @@ function PaymentsTab({ onSelect }) {
       <table className="ev-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Reservation</th>
             <th>Method</th>
             <th>Status</th>
             <th>Amount</th>
-            <th>Transaction Ref</th>
-            <th>Date</th>
+            <th>Paid on</th>
           </tr>
         </thead>
         <tbody>
@@ -80,12 +77,9 @@ function PaymentsTab({ onSelect }) {
             const badge = PAYMENT_STATUS_BADGE[p.status] ?? { label: p.status, cls: '' };
             return (
               <tr key={p.id} className="ev-row" onClick={() => onSelect(p)}>
-                <td className="ev-col-id">#{p.id}</td>
-                <td className="ev-col-id">#{p.reservationId}</td>
                 <td>{METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}</td>
                 <td><span className={`cpay-badge ${badge.cls}`}>{badge.label}</span></td>
                 <td style={{ fontWeight: 700 }}>{money(p.amount)}</td>
-                <td className="cpay-txn-ref">{p.transactionReference || '—'}</td>
                 <td className="ev-col-date">{fmt(p.paidAt ?? p.createdAt)}</td>
               </tr>
             );
@@ -121,31 +115,32 @@ function TicketsTab({ tickets, loading, error, onSelect }) {
       <table className="ev-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Ticket code</th>
+            <th>Event</th>
+            <th>Locality</th>
             <th>Seat</th>
-            <th>Reservation</th>
+            <th>Code</th>
             <th>Status</th>
-            <th>Issued</th>
-            <th>Used</th>
+            <th>Issued on</th>
           </tr>
         </thead>
         <tbody>
           {tickets.map((t) => {
             const badge = TICKET_STATUS_BADGE[t.status] ?? { label: t.status, cls: '' };
+            const shortCode = t.ticketCode
+              ? t.ticketCode.substring(0, 12) + '…'
+              : '—';
             return (
               <tr key={t.id} className="ev-row" onClick={() => onSelect(t)}>
-                <td className="ev-col-id">#{t.id}</td>
-                <td className="cpay-code">{t.ticketCode}</td>
+                <td>{t.eventName ?? '—'}</td>
+                <td>{t.localityName ?? '—'}</td>
                 <td>
                   {t.rowLabel && t.seatNumber
                     ? <span className="cpay-seat-tag">{t.rowLabel}{t.seatNumber}</span>
                     : '—'}
                 </td>
-                <td className="ev-col-id">#{t.reservationId}</td>
+                <td className="cpay-code">{shortCode}</td>
                 <td><span className={`cpay-badge ${badge.cls}`}>{badge.label}</span></td>
                 <td className="ev-col-date">{fmt(t.issuedAt)}</td>
-                <td className="ev-col-date">{fmt(t.usedAt)}</td>
               </tr>
             );
           })}

@@ -146,12 +146,11 @@ export default function ConsumerReservationsPage() {
                   <table className="ev-table">
                     <thead>
                       <tr>
-                        <th>#</th>
                         <th>Status</th>
                         <th>Seats</th>
                         <th>Total</th>
-                        <th>Reserved</th>
-                        <th>Expires / Purchased</th>
+                        <th>Reserved on</th>
+                        <th>Timeline</th>
                         <th></th>
                       </tr>
                     </thead>
@@ -160,20 +159,22 @@ export default function ConsumerReservationsPage() {
                         const badge = STATUS_BADGE[r.status] ?? { label: r.status, cls: '' };
                         const isExpired = r.expiresAt && new Date(r.expiresAt) < new Date();
                         const canPay = r.status === 'PENDING' && !isExpired;
-                        const expiresOrPurchased = r.status === 'CONFIRMED'
-                          ? formatDate(r.purchasedAt)
-                          : formatDate(r.expiresAt);
+
+                        let timeline;
+                        if (r.status === 'PENDING')   timeline = `Expires ${formatDate(r.expiresAt)}`;
+                        else if (r.status === 'CONFIRMED') timeline = `Paid ${formatDate(r.purchasedAt)}`;
+                        else if (r.status === 'EXPIRED')   timeline = `Expired ${formatDate(r.expiresAt)}`;
+                        else timeline = '—';
 
                         return (
                           <tr key={r.id} className="ev-row" onClick={() => setSelected(r)}>
-                            <td className="ev-col-id">#{r.id}</td>
                             <td>
                               <span className={`rsv-badge ${badge.cls}`}>{badge.label}</span>
                             </td>
                             <td>{Array.isArray(r.reservationSeats) ? r.reservationSeats.length : 0}</td>
                             <td style={{ fontWeight: 700 }}>{formatAmount(r.totalAmount)}</td>
                             <td className="ev-col-date">{formatDate(r.reservedAt)}</td>
-                            <td className="ev-col-date">{expiresOrPurchased}</td>
+                            <td className="ev-col-date">{timeline}</td>
                             <td className="ev-col-actions" onClick={(e) => e.stopPropagation()}>
                               {canPay && (
                                 <button
